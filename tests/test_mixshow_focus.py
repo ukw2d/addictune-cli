@@ -417,9 +417,10 @@ class MixshowFocusTests(unittest.IsolatedAsyncioTestCase):
             app.play_show(1)
             app.query_one(Tabs).active = "mixshows"
             await pilot.pause()
-            await pilot.pause()
+            await app.workers.wait_for_complete()
 
             mixshows = app.query_one(MixshowList)
+            await mixshows.wait_for_refresh()
             self.assertEqual(len(mixshows), 1)
             self.assertTrue(mixshows.children[0].has_class("playing"))
 
@@ -433,7 +434,7 @@ class MixshowFocusTests(unittest.IsolatedAsyncioTestCase):
             app.play_show(25)
             app.query_one(Tabs).active = "mixshows"
             await pilot.pause()
-            await pilot.pause()
+            await app.workers.wait_for_complete()
 
             mixshows = app.query_one(MixshowList)
             self.assertEqual(len(mixshows), 20)
@@ -442,8 +443,8 @@ class MixshowFocusTests(unittest.IsolatedAsyncioTestCase):
             )
 
             mixshows.request_more()
-            await pilot.pause()
-            await pilot.pause()
+            await app.workers.wait_for_complete()
+            await mixshows.wait_for_refresh()
 
             playing = [
                 child.show.id

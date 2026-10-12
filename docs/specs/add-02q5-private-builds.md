@@ -17,6 +17,11 @@ findings before any remote push. Keep the existing architecture and libraries.
 Do not publish, change visibility, tag, delete history, force-push or enable
 paid usage in this phase.
 
+Native Windows CI also exposed UI assertions running before deferred refresh
+callbacks finish and a missing `winrt.windows.foundation` projection during
+media-session startup. Resolve the readiness checks and declare the projections
+required by the existing Windows backend before the final build run.
+
 ## Requirements and ownership
 
 | ID | Owner | Contract and acceptance |
@@ -31,8 +36,10 @@ paid usage in this phase.
 | R8 | Release workflow | All four platform jobs pass tests, package their payloads, and pass extracted-payload diagnostics. Record artifact hashes and remaining manual playback checks. |
 | R9 | Image executor | Apply Unix scheduling priority only where supported; Windows image decoding must retain a usable executor. |
 | R10 | Platform tests | Read Python sources as UTF-8, access D-Bus properties through their actual descriptors, and wait for worker/render completion before asserting UI state. |
+| R11 | Windows media dependencies | Declare the projections required by the existing SMTC backend and verify its native imports on Windows. Actual media keys and playback remain manual platform checks. |
 
-No new persisted state, protocol or dependency is needed. Reuse existing session
+Race fixes need no new persisted state, protocol or dependency. Declare only the
+Windows projections required by the existing media backend. Reuse existing session
 ownership, generation checks and list/fetch state; retain the last submitted play
 generation to identify a child-process loss after playback has been retired.
 New repository Git history

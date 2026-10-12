@@ -33,6 +33,8 @@ dependencies = [
     "winrt-Windows.Media.Playback>=3.0; sys_platform == 'win32'",
     "av>=17.0.1",
     "platformdirs>=4.9.6",
+    "winrt-windows-foundation>=3.0 ; sys_platform == 'win32'",
+    "winrt-windows-storage-streams>=3.0 ; sys_platform == 'win32'",
 ]
 
 [project.urls]
