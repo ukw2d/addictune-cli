@@ -1,0 +1,34 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+wheels/
+*.egg
+
+.venv/
+
+*.mp3
+*.wav
+*.flac
+*.ogg
+
+.env
+scripts/
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+
+nuitka-crash-report.xml
+
+# AI agent trace files
+.agent_memory.json
+.claude/
+AGENTS.md
+CLAUDE.md
+
+# Task tracker state (local only)
+.beads/

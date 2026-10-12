@@ -1,0 +1,141 @@
+name: Release binaries
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version. Defaults to pyproject.toml when empty."
+        required: false
+        type: string
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            os: ubuntu-latest
+            artifact_glob: build/artifacts/*.tar.gz
+          - platform: macos-arm64
+            os: macos-14
+            artifact_glob: build/artifacts/*.pkg
+          - platform: macos-x86_64
+            os: macos-15-intel
+            artifact_glob: build/artifacts/*.pkg
+          - platform: windows
+            os: windows-latest
+            artifact_glob: build/artifacts/*.zip
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+
+      - name: Install Linux audio library
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libportaudio2
+
+      - name: Install dependencies
+        run: uv sync --locked --group dev
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          project_version="$(uv run python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')"
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            version="${GITHUB_REF_NAME#v}"
+          elif [ -n "$INPUT_VERSION" ]; then
+            version="$INPUT_VERSION"
+          else
+            version="$project_version"
+          fi
+          if [ "$version" != "$project_version" ] || [ "${INPUT_VERSION:-$project_version}" != "$project_version" ]; then
+            echo "::error::Release version must match pyproject.toml" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Check formatting
+        run: uv run ruff format --check addictune_cli/src/audio addictune_cli/src/media addictune_cli/src/settings.py addictune_cli/src/paths.py tools
+
+      - name: Test
+        run: uv run pytest
+
+      - name: Build artifact
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: uv run python tools/package.py --version "$RELEASE_VERSION" --assume-downloads
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: addictune-cli-${{ steps.version.outputs.version }}-${{ matrix.platform }}
+          path: ${{ matrix.artifact_glob }}
+          if-no-files-found: error
+
+  release:
+    name: Prepare draft beta release
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Generate checksums
+        working-directory: dist
+        run: |
+          assets=( *.pkg *.tar.gz *.zip )
+          test "${#assets[@]}" -eq 4
+          sha256sum "${assets[@]}" > SHA256SUMS
+
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if release_is_draft="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft' 2>/dev/null)"; then
+            if [ "$release_is_draft" != "true" ]; then
+              echo "::error::Refusing to overwrite a published release" >&2
+              exit 1
+            fi
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" \
+              --prerelease --title "$TAG (beta)" --notes-file .github/release-notes.md
+            gh release upload "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" dist/* \
+              --repo "$GITHUB_REPOSITORY" \
+              --verify-tag --draft --prerelease \
+              --title "$TAG (beta)" \
+              --notes-file .github/release-notes.md
+          fi

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: SDK issues (API behaviour)
+    url: https://github.com/ukw2d/addictune-sdk/issues
+    about: Problems with the AudioAddict API client itself belong in the SDK repo.

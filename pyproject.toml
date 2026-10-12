@@ -1,0 +1,59 @@
+[project]
+name = "addictune-cli"
+version = "0.2.0"
+description = "Unofficial DI.FM client for the terminal; also works with the other AudioAddict radio networks (RadioTunes, ROCKRADIO.COM, JAZZRADIO.com, Classical Radio, ZenRadio)"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "ukw2d" }]
+keywords = ["di.fm", "difm", "digitally imported", "audioaddict", "radiotunes", "rockradio", "jazzradio", "zenradio", "classical radio", "internet radio", "client", "tui", "terminal", "cli", "textual"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio :: Players",
+]
+requires-python = ">=3.12"
+dependencies = [
+    "addictune-sdk>=0.4.1",
+    "pydantic>=2.0",
+    "sounddevice>=0.5.5",
+    "textual>=8.2.5",
+    "keyring>=25.0.0",
+    "rich-pixels>=3.0.1",
+    "pillow>=12.2.0",
+    "dbus-fast>=5.0; sys_platform == 'linux'",
+    "pyobjc-framework-MediaPlayer>=10.0; sys_platform == 'darwin'",
+    "winrt-Windows.Media>=3.0; sys_platform == 'win32'",
+    "winrt-Windows.Media.Playback>=3.0; sys_platform == 'win32'",
+    "av>=17.0.1",
+    "platformdirs>=4.9.6",
+]
+
+[project.urls]
+Homepage = "https://github.com/ukw2d/addictune-cli"
+Issues = "https://github.com/ukw2d/addictune-cli/issues"
+
+[project.scripts]
+addictune = "addictune_cli.src.main:main"
+addictune-cli = "addictune_cli.src.main:main"
+
+[dependency-groups]
+dev = [
+    "nuitka>=4.1.3",
+    "pytest>=8.0",
+    "ruff>=0.13.0",
+    "textual-dev>=1.8.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["addictune_cli"]

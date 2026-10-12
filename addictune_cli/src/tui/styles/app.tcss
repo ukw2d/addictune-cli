@@ -1,0 +1,509 @@
+#main-content {
+    height: 1fr;
+}
+
+#filter-bar {
+    display: none;
+    width: 100%;
+    height: 1;
+    padding: 0 1;
+    background: $boost;
+    color: $text;
+    text-style: bold;
+    border-left: heavy $warning;
+}
+
+#local-search-bar {
+    display: none;
+    width: 100%;
+    height: 0;
+    padding: 0 1;
+    overflow: hidden;
+    background: $background;
+}
+
+#local-search-input {
+    width: 1fr;
+    padding: 0;
+}
+
+.app-content-list {
+    height: 1fr;
+}
+
+#empty-results {
+    display: none;
+}
+
+.media-list-row {
+    layout: horizontal;
+    width: 100%;
+    height: 1;
+}
+
+.media-list-name {
+    width: 1fr;
+}
+
+.live-show-badge {
+    display: none;
+    width: auto;
+    padding: 0 1;
+    text-style: bold;
+}
+
+.live-show-badge--live {
+    color: $success;
+}
+
+.live-show-badge--upcoming {
+    color: $warning;
+}
+
+ChannelItem.playing,
+MixshowItem.playing,
+PlaylistItem.playing,
+TrackItem.playing,
+EpisodeItem.playing {
+    background: $success-muted;
+    color: $text;
+}
+
+ChannelItem.suspended,
+MixshowItem.suspended,
+PlaylistItem.suspended,
+TrackItem.suspended,
+EpisodeItem.suspended {
+    background: $success 10%;
+    color: $text-muted;
+}
+
+DialogScreen {
+    align: center middle;
+}
+
+.modal-dialog {
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    padding: 1 2 0 2;
+    border: solid $primary;
+    background: $surface;
+    border-title-color: $primary;
+    border-subtitle-color: $text-muted;
+}
+
+/* Screen DEFAULT_CSS loses to this file, so dialog-specific overrides of
+   .modal-dialog live here. */
+#auth-dialog.modal-dialog {
+    padding: 1 3;
+    border: round $primary;
+}
+
+#settings-dialog.modal-dialog {
+    height: 70%;
+    padding: 0;
+}
+
+.modal-dialog Footer {
+    width: 100%;
+    height: auto;
+    padding: 0;
+    border-top: solid $primary;
+    background: $surface;
+}
+
+.dialog-heading {
+    width: 100%;
+    padding-bottom: 1;
+    color: $primary;
+    text-align: center;
+    text-style: bold;
+}
+
+.search-input {
+    height: 1;
+    border: none;
+    background: $background;
+    color: $text;
+}
+
+.empty-state {
+    height: 1fr;
+    content-align: center middle;
+    color: $text-muted;
+    text-style: italic;
+}
+
+/* Content-type colours and the mute marker, shared by the bar and the expanded player. */
+PlaybackBar #type-label, ExpandedPlayer .expanded--type {
+    &.live     { color: $error; }
+    &.mix      { color: $success; }
+    &.playlist { color: $accent; }
+    &.trk      { color: $accent; }
+}
+PlaybackBar #volume-label.muted, ExpandedPlayer .expanded--volume.muted { color: $warning; }
+
+/* media info */
+MediaInfoPanel {
+    dock: right;
+    width: 0;
+    max-width: 40;
+    height: 1fr;
+    overflow: hidden;
+}
+
+.media-info--scroll {
+    width: 100%;
+    height: 1fr;
+    padding: 1 0 1 1;
+}
+
+.media-info--content {
+    width: 100%;
+    height: auto;
+    padding-right: 1;
+}
+
+.info--image {
+    width: 100%;
+    height: auto;
+    content-align: center middle;
+    margin-bottom: 1;
+}
+
+.info--title-row {
+    width: 100%;
+    height: auto;
+    margin-bottom: 1;
+}
+
+.info--title {
+    width: 1fr;
+    text-style: bold;
+}
+
+.info--followed-badge {
+    display: none;
+    width: auto;
+    padding: 0 1;
+    background: $primary;
+    color: $text;
+    text-style: bold;
+}
+
+MediaInfoPanel.-narrow {
+    .info--title-row {
+        layout: vertical;
+    }
+
+    .info--title {
+        width: 100%;
+    }
+}
+
+.info--description {
+    width: 100%;
+    color: $text-muted;
+}
+
+.info--status {
+    width: 100%;
+    padding: 0 1;
+    border-left: heavy $foreground 30%;
+    margin-bottom: 1;
+}
+
+.info--status--live {
+    border-left: heavy $success;
+}
+
+.info--status--upcoming {
+    border-left: heavy $warning;
+}
+
+.info--recent {
+    display: none;
+    width: 100%;
+    height: auto;
+    margin-bottom: 1;
+}
+
+.info--recent-title {
+    width: 100%;
+    color: $text-muted;
+    text-style: bold;
+    margin-bottom: 1;
+}
+
+.info--recent-tracks {
+    width: 100%;
+    height: auto;
+    padding: 0 0 0 2;
+    border-left: outer $primary-darken-3;
+}
+
+.info--recent-track {
+    width: 100%;
+    color: $text;
+}
+
+.info--metadata {
+    width: 100%;
+    color: $text-muted;
+    margin-bottom: 1;
+}
+
+/* expanded player */
+ExpandedPlayer {
+    width: 100%;
+    height: 0;
+    overflow: hidden;
+    background: $background;
+}
+
+.expanded--row {
+    height: 1fr;
+    padding: 1 2;
+}
+
+.expanded--image {
+    width: 16;
+    height: 7;
+    margin-right: 2;
+    content-align: left top;
+    background: $panel-darken-2;
+}
+
+.expanded--controls {
+    width: 1fr;
+    height: 7;
+}
+
+.expanded--header {
+    height: 1;
+    width: 100%;
+}
+
+.expanded--state {
+    width: 2;
+    color: $text-muted;
+}
+
+.expanded--type {
+    width: 4;
+    color: $text-muted;
+}
+
+.expanded--quality {
+    display: none;
+    dock: right;
+    width: auto;
+    height: 1;
+    color: $text-muted;
+}
+
+.expanded--channel-row {
+    width: 100%;
+    height: 1;
+}
+
+/* The channel/show marquee is the only flexible item before the Follow rail. */
+.expanded--channel {
+    width: 1fr;
+    height: 1;
+    color: $text-muted;
+}
+
+.expanded--next {
+    visibility: hidden;
+    width: 100%;
+    height: 1;
+    color: $text-muted;
+}
+
+.expanded--title-row {
+    width: 100%;
+    height: 1;
+    margin-top: 1;
+}
+
+.expanded--title {
+    width: 1fr;
+    height: 1;
+    text-style: bold;
+}
+
+.expanded--seek-row {
+    dock: bottom;
+    height: 1;
+    width: 100%;
+}
+
+.expanded--transport {
+    width: 1fr;
+    height: 1;
+}
+
+.expanded--elapsed {
+    width: auto;
+    margin-right: 1;
+    color: $text-muted;
+}
+
+#expanded-seek {
+    width: 1fr;
+    max-width: 32;
+
+    Bar { width: 1fr; }
+}
+
+.expanded--duration {
+    width: auto;
+    margin-left: 1;
+    color: $text-muted;
+}
+
+.expanded--volume-control {
+    width: 18;
+    height: 1;
+    margin-left: 2;
+}
+
+.expanded--volume {
+    width: auto;
+    color: $text-muted;
+}
+
+#expanded-vol-bar {
+    width: 1fr;
+    margin-left: 1;
+
+    Bar { width: 1fr; }
+}
+
+.expanded--action {
+    width: auto;
+    color: $text-muted;
+
+    &.active {
+        color: $accent;
+        text-style: bold;
+    }
+}
+
+.expanded--title-row .expanded--action {
+    margin-left: 2;
+}
+
+/* Default hidden avoids reserving space before the first reactive update. */
+#expanded-follow {
+    display: none;
+    margin-left: 2;
+}
+
+ExpandedPlayer.-compact {
+    .expanded--image {
+        display: none;
+    }
+}
+
+ExpandedPlayer.-narrow {
+    .expanded--volume-control {
+        width: auto;
+        margin-left: 1;
+    }
+
+    #expanded-vol-bar {
+        display: none;
+    }
+}
+
+/* playback bar */
+PlaybackBar {
+    layout: horizontal;
+    height: 1;
+    padding: 0 1;
+
+    #state-icon {
+        width: auto;
+        margin-right: 1;
+    }
+
+    #stopped-hint {
+        color: $text-muted;
+    }
+
+    #type-label {
+        width: auto;
+        display: none;
+    }
+
+    #now-playing {
+        width: 1fr;
+        height: 1;
+        display: none;
+    }
+
+    .playback-separator {
+        width: auto;
+        margin: 0 1;
+        color: $text-muted;
+    }
+
+    #sep-playing {
+        display: none;
+    }
+
+    #sep-time {
+        display: none;
+    }
+
+    #playback-right {
+        dock: right;
+        width: auto;
+        height: 1;
+    }
+
+    #volume-label {
+        width: 5;
+        content-align: right middle;
+    }
+
+    #time-label {
+        width: auto;
+        color: $text-muted;
+        display: none;
+    }
+
+
+    /* Empty text (no airing show, not LIVE, or unresolved follow state)
+       collapses to zero width and contributes no margin. */
+    #live-show-follow {
+        width: auto;
+        display: none;
+
+        &.live-show-follow--followed,
+        &.live-show-follow--unfollowed {
+            margin-left: 1;
+        }
+
+        &.live-show-follow--followed { color: $accent; }
+        &.live-show-follow--unfollowed { color: $text-muted; }
+    }
+
+    /* Playback details are hidden while stopped (defaults above) and shown
+       once playback is active; the stopped hint does the opposite. */
+    &.-active {
+        #stopped-hint { display: none; }
+
+        #type-label,
+        #live-show-follow,
+        #sep-playing,
+        #now-playing,
+        #sep-time,
+        #time-label {
+            display: block;
+        }
+    }
+}
