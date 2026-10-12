@@ -306,6 +306,7 @@ class LiveShowFollowChipTests(unittest.IsolatedAsyncioTestCase):
         async with app.run_test() as pilot:
             bar = app.query_one(_PlaybackState)
             ep = app.query_one(ExpandedPlayer)
+            await _wait_for_player_bindings(ep)
             bar.channel_name = "Trance"
             await pilot.pause()
 
@@ -318,6 +319,7 @@ class LiveShowFollowChipTests(unittest.IsolatedAsyncioTestCase):
         async with app.run_test() as pilot:
             bar = app.query_one(_PlaybackState)
             ep = app.query_one(ExpandedPlayer)
+            await _wait_for_player_bindings(ep)
             bar.channel_name = "Trance"
             bar.live_show_id = 42
             bar.live_show_name = "FSOE 978"
@@ -356,6 +358,7 @@ class LiveShowFollowChipTests(unittest.IsolatedAsyncioTestCase):
         async with app.run_test() as pilot:
             bar = app.query_one(_PlaybackState)
             ep = app.query_one(ExpandedPlayer)
+            await _wait_for_player_bindings(ep)
             bar.channel_name = "Trance"
             bar.live_show_id = 42
             bar.live_show_name = "FSOE 978"
