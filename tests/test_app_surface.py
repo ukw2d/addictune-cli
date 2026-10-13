@@ -17,6 +17,7 @@ _ATTR = re.compile(r"\b(?:self\.)?app\.([A-Za-z_][A-Za-z_0-9]*)")
 # Plain instance state set in AddictuneApp.__init__/on_mount (not class attributes).
 _INSTANCE_STATE = {
     "settings",
+    "animation_level",  # Textual sets this on the App instance at runtime.
     "client",
     "user_id",
     "playing_episode_id",

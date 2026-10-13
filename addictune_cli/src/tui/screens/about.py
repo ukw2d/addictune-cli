@@ -1,5 +1,6 @@
-from importlib.metadata import version
+from importlib.metadata import requires, version
 
+from packaging.requirements import Requirement
 from rich.text import Text
 from textual.app import ComposeResult
 from textual.containers import Vertical
@@ -28,6 +29,15 @@ _REPO = "https://github.com/ukw2d/addictune-cli"
 _VERSION = version("addictune-cli")
 
 
+def stack_names() -> str:
+    requirements = map(Requirement, requires("addictune-cli") or ())
+    return "  ·  ".join(
+        requirement.name
+        for requirement in requirements
+        if requirement.marker is None or requirement.marker.evaluate()
+    )
+
+
 def logo() -> Text:
     """The mark in half-block cells: two pixel rows per terminal line."""
     rows = (*_LOGO, "." * len(_LOGO[0]))  # pad to an even row count
@@ -51,6 +61,7 @@ def logo() -> Text:
 
 class AboutScreen(DialogScreen):
     _cursor_on = True
+    _stack_offset = 0
     DEFAULT_CSS = """
 AboutScreen {
     .modal-dialog {
@@ -82,6 +93,22 @@ AboutScreen {
         text-align: center;
     }
 
+    #about-built-with {
+        margin-top: 1;
+    }
+
+    #about-stack {
+        width: 100%;
+        height: 1;
+        overflow: hidden;
+        color: $text-muted;
+    }
+
+    #about-stack.still {
+        height: auto;
+        text-align: center;
+    }
+
     #about-disclaimer {
         margin-top: 1;
         color: $text-muted;
@@ -104,9 +131,17 @@ AboutScreen {
                 f"[@click=app.open_url('{_REPO}/releases')]Releases[/]",
                 classes="about-row",
             )
+            yield Static("Built with", id="about-built-with", classes="about-row")
+            self._stack_text = stack_names()
+            still = self.app.animation_level == "none"
             yield Static(
-                "Built with Textual, PyAV, sounddevice and addictune-sdk",
-                classes="about-row",
+                Text(
+                    self._stack_text,
+                    no_wrap=not still,
+                    overflow="fold" if still else "crop",
+                ),
+                id="about-stack",
+                classes="still" if still else "",
             )
             yield Static(
                 "Not affiliated with AudioAddict, DI.FM, RadioTunes, ROCKRADIO.COM, "
@@ -119,11 +154,26 @@ AboutScreen {
     def on_mount(self) -> None:
         self.query_one("#about-dialog").border_title = "About"
         self._render_name()
-        self.set_interval(0.6, self._blink)
+        if self.app.animation_level != "none":
+            self.set_interval(0.6, self._blink)
+            self.set_interval(0.25, self._advance_stack)
 
     def _blink(self) -> None:
         self._cursor_on = not self._cursor_on
         self._render_name()
+
+    def _advance_stack(self) -> None:
+        if not self.is_current or not self._stack_text:
+            return
+        ticker = self._stack_text + "     "
+        self._stack_offset = (self._stack_offset + 1) % len(ticker)
+        self.query_one("#about-stack", Static).update(
+            Text(
+                ticker[self._stack_offset :] + ticker[: self._stack_offset],
+                no_wrap=True,
+                overflow="crop",
+            )
+        )
 
     def _render_name(self) -> None:
         cursor = "▌" if self._cursor_on else " "
