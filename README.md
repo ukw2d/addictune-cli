@@ -219,7 +219,7 @@ just package    # build the standalone artifact for this OS into build/artifacts
 
 After retaking screenshots, run `uv run python tools/readme_hero.py` to rebuild the stacked header image.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow. Notes from the refactor are in [`docs/rewrite/`](docs/rewrite/README.md). [`release-binaries.yml`](.github/workflows/release-binaries.yml) can be run manually to test builds. A matching `v*` tag prepares a draft beta release with binaries and checksums; publish it after verifying the downloads.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow. [`release-binaries.yml`](.github/workflows/release-binaries.yml) can be run manually to test builds. A matching `v*` tag prepares a draft beta release with binaries and checksums; publish it after verifying the downloads.
 
 ## ☕ Support
 

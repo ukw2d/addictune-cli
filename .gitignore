@@ -32,3 +32,7 @@ CLAUDE.md
 
 # Task tracker state (local only)
 .beads/
+
+# Internal planning notes (local only)
+docs/specs/
+docs/rewrite/
