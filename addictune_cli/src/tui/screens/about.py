@@ -126,9 +126,11 @@ AboutScreen {
                 id="about-tagline",
             )
             yield Static(
-                f"[@click=app.open_url('{_REPO}')]GitHub[/]  ·  "
-                f"[@click=app.open_url('{_REPO}/issues')]Report a bug[/]  ·  "
-                f"[@click=app.open_url('{_REPO}/releases')]Releases[/]",
+                f"[@click=screen.open_url('{_REPO}')]GitHub[/]  ·  "
+                f"[@click=screen.open_url('{_REPO}/issues')]Report a bug[/]  ·  "
+                f"[@click=screen.open_url('{_REPO}/releases')]Releases[/]  ·  "
+                f"[@click=screen.open_url('{_REPO}#-support')]Support[/]",
+                id="about-links",
                 classes="about-row",
             )
             yield Static("Built with", id="about-built-with", classes="about-row")
@@ -157,6 +159,10 @@ AboutScreen {
         if self.app.animation_level != "none":
             self.set_interval(0.6, self._blink)
             self.set_interval(0.25, self._advance_stack)
+
+    def action_open_url(self, url: str) -> None:
+        # Textual's App has open_url() but no matching action for @click markup.
+        self.app.open_url(url)
 
     def _blink(self) -> None:
         self._cursor_on = not self._cursor_on

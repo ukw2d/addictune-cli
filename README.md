@@ -17,6 +17,7 @@ Browse live channels, DJ mixshows, curated playlists and your liked tracks. Cont
 [![CI](https://img.shields.io/github/actions/workflow/status/ukw2d/addictune-cli/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI)](https://github.com/ukw2d/addictune-cli/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/ukw2d/addictune-cli?include_prereleases&style=for-the-badge&logo=github&label=release&color=blue)](https://github.com/ukw2d/addictune-cli/releases)
 [![License: MIT](https://img.shields.io/github/license/ukw2d/addictune-cli?style=for-the-badge&color=green)](LICENSE)
+[![Donate USDT](https://img.shields.io/badge/donate-USDT-26A17B?style=for-the-badge&logo=tether&logoColor=white)](#-support)
 
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
 [![Built with Textual](https://img.shields.io/badge/built%20with-Textual-5b2ee0?style=flat-square)](https://textual.textualize.io/)
@@ -25,7 +26,11 @@ Browse live channels, DJ mixshows, curated playlists and your liked tracks. Cont
 ![Platforms](https://img.shields.io/badge/platforms-macOS%20%C2%B7%20Linux%20%C2%B7%20Windows-lightgrey?style=flat-square)
 [![SDK: addictune-sdk](https://img.shields.io/pypi/v/addictune-sdk?style=flat-square&label=addictune-sdk&color=orange)](https://pypi.org/project/addictune-sdk/)
 
-[Install](#-install) · [Features](#-features) · [Keys](#-keyboard-shortcuts) · [How it works](#-how-it-works) · [Contributing](CONTRIBUTING.md)
+[Features](#-features) · [Install](#-install) · [Quick start](#-quick-start) · [Keys](#-keyboard-shortcuts) · [Privacy](#-accounts-and-privacy) · [How it works](#-how-it-works) · [Contributing](CONTRIBUTING.md)
+
+<br>
+
+<img src="docs/assets/hero-networks.png" alt="addictune playing a live DI.FM show, stacked in front of Jazz Radio, Classical Radio and Zen Radio, each in its own color theme" width="100%">
 
 </div>
 
@@ -36,13 +41,9 @@ Browse live channels, DJ mixshows, curated playlists and your liked tracks. Cont
 >
 > **Unofficial project.** addictune is not affiliated with, endorsed by or sponsored by AudioAddict, DI.FM, RadioTunes, ROCKRADIO.COM, JAZZRADIO.com, Classical Radio or ZenRadio. All names and trademarks belong to their owners. You need your own AudioAddict account.
 
-<div align="center">
-<img src="docs/assets/screenshot-channels.png" alt="addictune DI.FM client: Channels tab with live and upcoming show badges and the expanded playback bar" width="100%">
-</div>
-
 ## ✨ Features
 
-- **Six networks, one client.** Each network has its own colour theme. Switch networks from the command palette.
+- **Six networks, one client.** Each network has its own color theme. Switch networks from the command palette.
 - **Channels, Mixshows, Playlists, Tracks.** Tabs appear when the active network supports that content. The Tracks tab shows your liked tracks.
 - **Live shows.** A `LIVE NOW` badge marks channels with a show on air. The info panel shows current and upcoming shows, plus recently played tracks.
 - **Follow and rate.** Follow channels, mixshows, playlists and live shows, and like or dislike tracks from the keyboard.
@@ -56,16 +57,53 @@ Browse live channels, DJ mixshows, curated playlists and your liked tracks. Cont
 
 <table>
 <tr>
-<td width="33%"><img src="docs/assets/screenshot-channels-info.png" alt="DI.FM channel list with the info panel and compact playback line"></td>
-<td width="33%"><img src="docs/assets/screenshot-channels-info-player.png" alt="DI.FM channel list with the info panel and the expanded playback bar"></td>
-<td width="33%"><img src="docs/assets/screenshot-playlists.png" alt="Playlists tab with a track playing in the expanded playback bar"></td>
+<td width="50%"><img src="docs/assets/screenshot-channels-info.png" alt="DI.FM channel list with the info panel and compact playback line"></td>
+<td width="50%"><img src="docs/assets/screenshot-channels-info-player.png" alt="DI.FM channel list with the info panel and the expanded playback bar"></td>
 </tr>
 <tr>
 <td align="center"><sub>Channels with the info panel</sub></td>
 <td align="center"><sub>Info panel and expanded playback bar</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/assets/screenshot-playlists.png" alt="Playlists tab with a track playing in the expanded playback bar"></td>
+<td width="50%"><img src="docs/assets/settings.png" alt="Settings dialog on the Audio Output page with output device and sample rate options"></td>
+</tr>
+<tr>
 <td align="center"><sub>Playlists</sub></td>
+<td align="center"><sub>Audio settings</sub></td>
 </tr>
 </table>
+
+<details>
+<summary><b>More networks</b>: Jazz Radio, Classical Radio, Rock Radio, RadioTunes, Zen Radio and the network picker</summary>
+<br>
+<table>
+<tr>
+<td width="50%"><img src="docs/assets/jazz-radio.png" alt="Jazz Radio channel list in its red theme with Bebop playing"></td>
+<td width="50%"><img src="docs/assets/classical-radio.png" alt="Classical Radio channel list in its blue theme with Bach playing"></td>
+</tr>
+<tr>
+<td align="center"><sub>Jazz Radio</sub></td>
+<td align="center"><sub>Classical Radio</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/assets/rock-radio.png" alt="Rock Radio channel list in its charcoal and yellow theme with Heavy Metal playing"></td>
+<td width="50%"><img src="docs/assets/radio-tunes.png" alt="RadioTunes channel list in its navy and orange theme with New Age playing"></td>
+</tr>
+<tr>
+<td align="center"><sub>Rock Radio</sub></td>
+<td align="center"><sub>RadioTunes</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/assets/zen-radio.png" alt="Zen Radio channel list in its teal theme with Relaxation playing"></td>
+<td width="50%"><img src="docs/assets/radio-selection.png" alt="Choose Radio Station dialog listing the six AudioAddict networks"></td>
+</tr>
+<tr>
+<td align="center"><sub>Zen Radio</sub></td>
+<td align="center"><sub>Network picker, from the command palette</sub></td>
+</tr>
+</table>
+</details>
 
 ## 📦 Install
 
@@ -110,7 +148,7 @@ just run --dev       # run from source with debug logging
 
 ## 🚀 Quick start
 
-1. Run `addictune`.
+1. Run `addictune` (`addictune-cli` if you installed a prebuilt binary).
 2. Sign in with your AudioAddict email and password.
 3. Choose a network (change it later from the command palette, `Ctrl+P`).
 4. Navigate with `↑`/`↓` or `j`/`k`. Press `Enter` to play; use `Space` to play, pause or stop, depending on the content.
@@ -122,17 +160,17 @@ The footer shows keyboard shortcuts available in the current context.
 | Key | Action | Key | Action |
 |---|---|---|---|
 | `Enter` | Play selected | `Space` | Play / pause / stop |
-| `S` | Stop | `P` / `N` | Previous / next track |
+| `s` | Stop | `p` / `n` | Previous / next track |
 | `←` / `→` | Seek −10 s / +10 s | `+` / `-` | Volume up / down |
-| `M` | Mute | `L` / `D` | Like / dislike current track |
-| `F` | Follow / unfollow selected item | `Ctrl+L` | Follow / unfollow the airing live show |
-| `E` | Expanded playback bar | `I` | Media info panel |
+| `m` | Mute | `l` / `d` | Like / dislike current track |
+| `f` | Follow / unfollow selected item | `Ctrl+L` | Follow / unfollow the airing live show |
+| `e` | Expanded playback bar | `i` | Media info panel |
 | `/` | Find in current list | `Ctrl+G` | Search all categories |
 | `Ctrl+F` | Filter and sort options | `Ctrl+U` | Clear search |
 | `j` `k` `g` `G` | Down / up / top / bottom | `Esc` | Close search or dialog |
 | `Ctrl+P` | Command palette (settings, station, theme) | | |
 
-You need to be signed in to like, dislike or follow. Shortcuts are enabled when they apply; for example, `P` is unavailable during live radio playback.
+You need to be signed in to like, dislike or follow. Shortcuts are enabled when they apply; for example, `p` is unavailable during live radio playback.
 
 ## 🔐 Accounts and privacy
 
@@ -169,8 +207,6 @@ flowchart LR
 - **Audio:** [PyAV](https://github.com/PyAV-Org/PyAV) decodes the audio and [`sounddevice`](https://python-sounddevice.readthedocs.io/) sends it to your output device. Both run in a separate process that shuts down with the app. For playback logs and troubleshooting, see [`docs/debugging-playback.md`](docs/debugging-playback.md).
 - **Packaging:** [Nuitka](https://nuitka.net/) produces standalone builds for each supported OS and CPU architecture.
 
-Notes from the refactor are available in [`docs/rewrite/`](docs/rewrite/README.md).
-
 ## 🛠️ Development
 
 ```sh
@@ -181,7 +217,28 @@ just run --dev  # DEBUG logging + Textual devtools (run `uv run textual console`
 just package    # build the standalone artifact for this OS into build/artifacts/
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow. [`release-binaries.yml`](.github/workflows/release-binaries.yml) can be run manually to test builds. A matching `v*` tag prepares a draft beta release with binaries and checksums; publish it after verifying the downloads.
+After retaking screenshots, run `uv run python tools/readme_hero.py` to rebuild the stacked header image.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow. Notes from the refactor are in [`docs/rewrite/`](docs/rewrite/README.md). [`release-binaries.yml`](.github/workflows/release-binaries.yml) can be run manually to test builds. A matching `v*` tag prepares a draft beta release with binaries and checksums; publish it after verifying the downloads.
+
+## ☕ Support
+
+addictune is free and open source. If you enjoy it, you can support development with a USDT donation. Starring the repo and reporting bugs help too.
+
+**USDT on TRON (TRC-20)**
+
+```
+TBtdQtJ7FTvwYQqcpjy9NFe8mNaW66fWqv
+```
+
+**USDT on Ethereum (ERC-20)**
+
+```
+0x0548237F4573155d32b32739cE68a76eA66e6673
+```
+
+> [!WARNING]
+> Send only USDT, and only on the network named above the address. Tokens sent on any other network may be lost.
 
 ## 📄 License
 

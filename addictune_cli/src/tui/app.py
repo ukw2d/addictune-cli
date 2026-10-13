@@ -1,5 +1,6 @@
 import logging
 from collections.abc import Iterable
+from typing import Any
 
 from addictune_sdk import Client
 from addictune_sdk.models.mixshow import ShowEpisode
@@ -22,6 +23,7 @@ from .services.following import (
     FollowedController,
     MixshowFollowedController,
     PlaylistFollowedController,
+    RemoteListController,
     TracksController,
 )
 from .palettes import STATION_PALETTES, THEME_FIELDS
@@ -62,7 +64,7 @@ from .widgets.app_footer import AppFooter
 from .widgets.channel_list import ChannelList
 from .widgets.expanded_player import ExpandedPlayer
 from .widgets.media_info import MediaInfoPanel
-from .widgets.media_list import selected_child
+from .widgets.media_list import MediaList, selected_child
 from .widgets.mixshow_list import MixshowItem, MixshowList
 from .widgets.playback_bar import SEEK_STEP, PlaybackBar
 from .widgets.playlist_list import PlaylistList
@@ -161,8 +163,8 @@ class AddictuneApp(App):
             priority=True,
             show=False,
         ),
-        Binding("p", "previous_track", BINDING_PREVIOUS_TRACK),
-        Binding("n", "next_track", BINDING_NEXT_TRACK),
+        Binding("p", "previous_track", BINDING_PREVIOUS_TRACK, key_display="P"),
+        Binding("n", "next_track", BINDING_NEXT_TRACK, key_display="N"),
         Binding("l", "vote('up')", "Like / unlike current track", show=False),
         Binding("d", "vote('down')", "Dislike / remove dislike", show=False),
         # Hidden: the bar's heart marker and the expanded player's chip already show it.
@@ -242,10 +244,13 @@ class AddictuneApp(App):
 
     async def on_mount(self) -> None:
         for slug, palette in STATION_PALETTES.items():
+            colors: dict[str, Any] = {
+                k: v for k, v in palette.items() if k in THEME_FIELDS
+            }
             self.register_theme(
                 Theme(
                     name=f"station-{slug}",
-                    **{k: v for k, v in palette.items() if k in THEME_FIELDS},
+                    **colors,
                     success="#09bd5f",
                     warning="#f5a623",
                     error="#f44741",
@@ -720,15 +725,17 @@ class AddictuneApp(App):
         self.refresh_bindings()
 
     def _load_lazy_tab_if_needed(self, tab: str | None) -> None:
-        if tab not in _LAZY_TABS or not self._tab_available(tab):
+        if tab is None or tab not in _LAZY_TABS or not self._tab_available(tab):
             return
         selector, list_type = TAB_LISTS[tab]
         widget = self.query_one(selector, list_type)
         if len(widget) or widget.is_loading or widget.is_exhausted:
             return
-        self._followed_controllers[tab].load()
+        controller = self._followed_controllers[tab]
+        assert isinstance(controller, RemoteListController)
+        controller.load()
 
-    def _retry_lazy_list_after_auth(self, widget: ListView) -> None:
+    def _retry_lazy_list_after_auth(self, widget: MediaList) -> None:
         """A lazy list hit an auth error and the session was recovered: reload it."""
         tab = self.query_one(Tabs).active
         if tab in _LAZY_TABS and self.query_one(TAB_LISTS[tab][0]) is widget:
