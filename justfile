@@ -28,6 +28,10 @@ install:
 package *args:
     uv run python tools/package.py --assume-downloads {{ args }}
 
+# Record the README demo (needs resvg, ffmpeg and Fira Code; plays audio): build/demo/demo.mp4 and docs/assets/demo.gif
+demo *args:
+    uv run python tools/record_demo.py {{ args }}
+
 # Remove build output
 [confirm("Delete build/?")]
 clean:

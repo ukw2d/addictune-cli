@@ -26,7 +26,7 @@ Browse live channels, DJ mixshows, curated playlists and your liked tracks. Cont
 ![Platforms](https://img.shields.io/badge/platforms-macOS%20%C2%B7%20Linux%20%C2%B7%20Windows-lightgrey?style=flat-square)
 [![SDK: addictune-sdk](https://img.shields.io/pypi/v/addictune-sdk?style=flat-square&label=addictune-sdk&color=orange)](https://pypi.org/project/addictune-sdk/)
 
-[Features](#-features) · [Install](#-install) · [Quick start](#-quick-start) · [Keys](#-keyboard-shortcuts) · [Privacy](#-accounts-and-privacy) · [How it works](#-how-it-works) · [Contributing](CONTRIBUTING.md)
+[Demo](#-see-it-in-action) · [Features](#-features) · [Install](#-install) · [Quick start](#-quick-start) · [Keys](#-keyboard-shortcuts) · [Privacy](#-accounts-and-privacy) · [How it works](#-how-it-works) · [Contributing](CONTRIBUTING.md)
 
 <br>
 
@@ -40,6 +40,38 @@ Browse live channels, DJ mixshows, curated playlists and your liked tracks. Cont
 > **Beta software.** addictune is in beta and under active development. Features and behavior may change between releases.
 >
 > **Unofficial project.** addictune is not affiliated with, endorsed by or sponsored by AudioAddict, DI.FM, RadioTunes, ROCKRADIO.COM, JAZZRADIO.com, Classical Radio or ZenRadio. All names and trademarks belong to their owners. You need your own AudioAddict account.
+
+## 🎬 See it in action
+
+<div align="center">
+
+<table>
+<tr>
+<td>
+<img src="docs/assets/demo.gif" alt="addictune demo: arrowing through DI.FM channels, the info sidebar, starting the live show, the expanded player, switching tabs, searching for ASOT and opening the command palette" width="100%">
+</td>
+</tr>
+</table>
+
+*Channels and the info sidebar · a live show · the expanded player · Mixshows, Playlists and Tracks · global search · command palette*
+
+<br>
+<br>
+
+<table>
+<tr>
+<td align="center" width="25%">📻<br><b>Six networks</b><br><sub>Each in its own color theme</sub></td>
+<td align="center" width="25%">🔴<br><b>Live shows</b><br><sub>On-air badges, schedule and recent tracks</sub></td>
+<td align="center" width="25%">⌨️<br><b>Keyboard first</b><br><sub>Arrows or vim keys, search and filters</sub></td>
+<td align="center" width="25%">🎛️<br><b>Media keys</b><br><sub>MPRIS, macOS and Windows controls</sub></td>
+</tr>
+</table>
+
+<br>
+
+⭐ *Like what you see?* [Star the repo](https://github.com/ukw2d/addictune-cli) *to help other terminal dwellers find it.*
+
+</div>
 
 ## ✨ Features
 
