@@ -3,7 +3,9 @@ from textual.await_complete import AwaitComplete
 from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.widgets import Footer, Label, ListItem, ListView, Select
 
-from ...settings import Settings
+from ...auth import load_credentials
+from ...settings import STATION_NAMES, Settings
+from ..presentation import ACCOUNT_FREE_HINT, ACCOUNT_TIERS
 from .dialog import DialogScreen
 
 _SAMPLE_RATE_AUTO = 0  # sentinel: None in Settings, 0 is not a valid Hz value
@@ -101,6 +103,16 @@ class _GeneralSection(_SettingsSection):
             allow_blank=False,
             id="default-tab-select",
         )
+        yield Label("Account", classes="setting-label")
+        yield Label(self._account(), id="account", markup=False)
+
+    def _account(self) -> str:
+        email = (load_credentials() or ("",))[0]
+        premium = self.app.client.premium
+        station = STATION_NAMES.get(self.app.network, self.app.network)
+        tier = None if premium is None else ACCOUNT_TIERS[premium]
+        line = " · ".join(part for part in (email, station, tier) if part)
+        return f"{line}\n{ACCOUNT_FREE_HINT}" if premium is False else line
 
 
 _SECTIONS: list[tuple[str, type[_SettingsSection]]] = [

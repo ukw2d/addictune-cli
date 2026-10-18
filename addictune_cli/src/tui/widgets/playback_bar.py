@@ -38,6 +38,7 @@ from ..presentation import (
     INITIAL_TIME_LABEL,
     PLAYBACK_ERROR_TIMEOUT,
     PLAYBACK_FAILED,
+    PLAYBACK_NEEDS_PREMIUM,
     PLAYBACK_RECONNECTING,
     PLAYBACK_SEPARATOR,
     PLAYBACK_STATE_ICONS,
@@ -76,6 +77,9 @@ def _hires_artwork_url(url: str | None, size: int = _ARTWORK_SIZE) -> str:
 
 _VOLUME_STEP = 5
 SEEK_STEP = 10
+# How a refused stream reads in _failure_detail: libav names the HTTP status,
+# a refused playlist fetch is reported by exception type.
+_AUTH_REFUSAL_MARKERS = ("Forbidden", "AddictuneAuthError")
 _log = logging.getLogger("addictune_cli.playback_bar")
 
 
@@ -602,8 +606,14 @@ class PlaybackBar(AppNode, Widget):
         """Surface why playback ended, unless it ended cleanly."""
         if self._failure_detail is None:
             return
+        # A free account's premium stream is refused rather than broken.
+        needs_premium = self.app.client.premium is False and any(
+            marker in self._failure_detail for marker in _AUTH_REFUSAL_MARKERS
+        )
         self.app.notify(
-            PLAYBACK_FAILED.format(detail=self._failure_detail),
+            PLAYBACK_NEEDS_PREMIUM
+            if needs_premium
+            else PLAYBACK_FAILED.format(detail=self._failure_detail),
             severity="error",
             timeout=PLAYBACK_ERROR_TIMEOUT,
         )

@@ -9,6 +9,7 @@ path lives in ChannelsService and is covered in test_channels_service.py.
 """
 
 import unittest
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 from textual.app import App, ComposeResult
@@ -24,6 +25,7 @@ from support import temp_settings
 
 class _App(App):
     CSS_PATH = "../addictune_cli/src/tui/styles/app.tcss"
+    client = SimpleNamespace(premium=None)
 
     def compose(self) -> ComposeResult:
         yield PlaybackBar(temp_settings(), media_session=NullSession())

@@ -32,6 +32,9 @@ AUTH_ERROR_GENERIC = "⚠  Couldn't sign in. Check your connection and try again
 AUTH_EMAIL_REQUIRED = "⚠  Please enter your email."
 AUTH_PASSWORD_REQUIRED = "⚠  Please enter your password."
 
+ACCOUNT_TIERS = {True: "Premium", False: "Free"}
+ACCOUNT_FREE_HINT = "Streams need a Premium subscription; see the station's website."
+
 TAB_CHANNELS = "Channels"
 TAB_MIXSHOWS = "Mixshows"
 TAB_PLAYLISTS = "Playlists"
@@ -61,6 +64,7 @@ NO_TRACKS_AVAILABLE = "No tracks available"
 PLAYLIST_SKIP_UNAVAILABLE = "Finish this playlist set before loading another."
 PLAYLIST_NO_NEW_TRACKS = "No new playlist tracks are available yet."
 PLAYBACK_FAILED = "Playback failed: {detail}"
+PLAYBACK_NEEDS_PREMIUM = "This stream needs a Premium subscription (signed in as Free)."
 PLAYBACK_RECONNECTING = "Stream dropped — reconnecting…"
 # Failures are the one notification worth reading in full before it fades.
 PLAYBACK_ERROR_TIMEOUT = 10.0

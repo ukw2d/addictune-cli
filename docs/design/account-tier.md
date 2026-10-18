@@ -1,6 +1,18 @@
 # Account tier in the UI
 
-Status: approved. Beads: at-lx2.
+Status: implemented. Beads: at-lx2.
+
+**Implemented as** (deviations from the text below, all reducing state):
+- Tier is `premium` when any subscription has `status == "active"`; the
+  server's status is trusted, `expires_on` is not parsed. Exposed as
+  `AuthResponse.premium` and `Client.premium` (addictune-sdk 0.4.2).
+- No `app.account_tier`: the app reads `client.premium`, which every login
+  (form, silent sign-in, recovery) refreshes.
+- Free-tier notice matches the refusal on both failure paths ("Forbidden"
+  from libav, `AddictuneAuthError` from the playlist fetch):
+  "This stream needs a Premium subscription (signed in as Free)."
+- The Sign out button is part of the sign-out epic (`at-ouf`).
+- Tests: `tests/test_settings_account.py`, `tests/test_playback_failure_reporting.py`.
 
 ## Problem
 

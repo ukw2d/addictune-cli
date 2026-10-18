@@ -114,6 +114,39 @@ class StoppedReasonTests(unittest.TestCase):
             post_message=messages.append,
         )
 
+    def _failure_toast(self, premium: bool | None, detail: str) -> str:
+        bar = SimpleNamespace(
+            app=SimpleNamespace(
+                notify=mock.Mock(), client=SimpleNamespace(premium=premium)
+            ),
+            _failure_detail=detail,
+        )
+        PlaybackBar._notify_playback_failure(bar)
+        return bar.app.notify.call_args.args[0]
+
+    def test_a_free_account_is_told_it_needs_premium(self) -> None:
+        """A premium stream is refused by libav on one path, by the SDK on the other."""
+        for detail in (
+            "[Errno 858797304] Server returned 403 Forbidden (access denied): 'https://x'",
+            "AddictuneAuthError: Forbidden",
+        ):
+            with self.subTest(detail=detail):
+                message = self._failure_toast(False, detail)
+                self.assertIn("Premium", message)
+                self.assertNotIn("Forbidden", message)
+
+    def test_other_accounts_and_other_failures_see_the_real_error(self) -> None:
+        refused = "Server returned 403 Forbidden"
+        for premium, detail in (
+            (True, refused),
+            (None, refused),
+            (False, "[Errno 5] Input/output error: 'https://x'"),
+        ):
+            with self.subTest(premium=premium, detail=detail):
+                self.assertEqual(
+                    self._failure_toast(premium, detail), f"Playback failed: {detail}"
+                )
+
     def test_backend_stop_preserves_natural_completion_reason(self) -> None:
         messages: list = []
         bar = self._bar(messages)

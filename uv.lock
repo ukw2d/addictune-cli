@@ -35,7 +35,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "addictune-sdk", specifier = ">=0.4.1" },
+    { name = "addictune-sdk", specifier = ">=0.4.2" },
     { name = "av", specifier = ">=17.0.1" },
     { name = "dbus-fast", marker = "sys_platform == 'linux'", specifier = ">=5.0" },
     { name = "keyring", specifier = ">=25.0.0" },
@@ -63,16 +63,16 @@ dev = [
 
 [[package]]
 name = "addictune-sdk"
-version = "0.4.1"
+version = "0.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "platformdirs" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/71/5b/bd9a8bda1a5b4bf9dfd3ac3a7cf401fb48858d3d7921f04b4f54eae465c2/addictune_sdk-0.4.1.tar.gz", hash = "sha256:9bc131ab3ec02b6188e20be479b7add9aba84b4e29755419745f5e7c199303d9", size = 43836, upload-time = "2026-10-06T10:10:19.518Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b9/7c/0f9559853d9390fa724649b9aba1719f4708dc9f675e76040c6d4129edfa/addictune_sdk-0.4.2.tar.gz", hash = "sha256:d614c0a408647272314f15cebac1beb5a9d4c0c5650223d659902feee548f42c", size = 44712, upload-time = "2026-10-18T21:10:32.954Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/23/b8/054c8668cde639b126ad866a37219ea4b5ce4fbc044a363958ba010fb39e/addictune_sdk-0.4.1-py3-none-any.whl", hash = "sha256:aa0ad4c0b9762c015006f2b9e5572759ad3836f54de6030d6472b3a8071d35a2", size = 39143, upload-time = "2026-10-06T10:10:20.655Z" },
+    { url = "https://files.pythonhosted.org/packages/df/d9/ecbaf610c772d5793dc1471afc46a6cc573a0f93d0758167ea839cef83c2/addictune_sdk-0.4.2-py3-none-any.whl", hash = "sha256:a86023f6a929dc5ca2eb36f4311d3db369bae1fa763da98ae1a4b182ebedfd21", size = 39449, upload-time = "2026-10-18T21:10:31.072Z" },
 ]
 
 [[package]]
