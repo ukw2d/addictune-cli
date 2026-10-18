@@ -1,6 +1,6 @@
 [project]
 name = "addictune-cli"
-version = "0.2.0"
+version = "0.2.1"
 description = "Unofficial DI.FM client for the terminal; also works with the other AudioAddict radio networks (RadioTunes, ROCKRADIO.COM, JAZZRADIO.com, Classical Radio, ZenRadio)"
 readme = "README.md"
 license = "MIT"

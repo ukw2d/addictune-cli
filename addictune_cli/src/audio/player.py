@@ -17,6 +17,7 @@ from typing import Protocol
 from .output import OutputConfig
 from .protocol import AudioStreamInfo
 from .state import State
+from ..logging_setup import redact_url
 
 _log = logging.getLogger("audio.player")
 _POSITION_INTERVAL = 1.0
@@ -310,6 +311,8 @@ class Player:
         if not current:
             return
         if kind is not None:
-            _log.error("%s failed: %r", kind, exc)
-            self._on_error(session.generation, kind, str(exc))
+            # libav quotes the URL it failed on, and stream URLs are signed.
+            message = str(exc).replace(session.url, redact_url(session.url))
+            _log.error("%s failed: %s: %s", kind, type(exc).__name__, message)
+            self._on_error(session.generation, kind, message)
         self._on_state(session.generation, State.STOPPED)

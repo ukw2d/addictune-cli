@@ -310,6 +310,26 @@ class PlayerTests(unittest.TestCase):
         self.assertEqual(events.errors, [(gen, "decode", "boom")])
         self.assertEqual(events.states, [(gen, State.STOPPED)])
 
+    def test_a_failure_message_never_carries_the_signed_url_secrets(self) -> None:
+        """libav errors quote the URL they failed on, and a stream URL is signed."""
+        url = "https://content.example/t.mp3?audio_token=s3cret&auth=s1gn&member_id=42"
+        events = _Events()
+
+        def broken(_url, **kwargs):
+            raise OSError(5, "Input/output error", url)
+
+        player = _player(events, broken)
+        with self.assertLogs("audio.player", level="ERROR") as logs:
+            player.play(1, url, live=False, volume=1.0)
+            self.assertTrue(events.done.wait(2))
+        player.close()
+
+        ((_, _, message),) = events.errors
+        for text in (message, "\n".join(logs.output)):
+            self.assertIn("content.example/t.mp3", text)
+            for secret in ("s3cret", "s1gn", "42"):
+                self.assertNotIn(secret, text)
+
     def test_output_failure_is_a_device_error(self) -> None:
         events = _Events()
 

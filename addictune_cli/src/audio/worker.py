@@ -11,6 +11,7 @@ import sys
 import threading
 import time
 
+import av.logging
 from pydantic import BaseModel, ValidationError
 
 from ..logging_setup import setup_logging
@@ -43,6 +44,10 @@ class _NullOutput:
 
 def main() -> None:
     setup_logging("player")
+    # PyAV discards libav's log by default, which leaves a connection failure as
+    # a bare "[Errno 5] Input/output error". With a level set, the exception
+    # carries the reason ("[tls] ...", "[tcp] Failed to resolve hostname ...").
+    av.logging.set_level(av.logging.ERROR)
     # Device names may be non-ASCII; the pipe must not depend on the locale (Windows).
     sys.stdin.reconfigure(encoding="utf-8")
     sys.stdout.reconfigure(encoding="utf-8", newline="\n")

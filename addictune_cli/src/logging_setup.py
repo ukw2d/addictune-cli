@@ -20,7 +20,20 @@ _LOG_FILE_ENV = "ADDICTUNE_LOG_FILE"
 _LOG_LEVEL_ENV = "ADDICTUNE_LOG_LEVEL"
 # "audio" is not under the "addictune_cli" prefix, so it needs its own handler.
 _ROOTS = ("addictune_cli", "audio")
-_SECRET_PARAMS = frozenset({"listen_key", "token", "password"})
+# Signed stream URLs (content.audioaddict.com) carry the account's token,
+# signature and the address the signature is bound to, next to the listen key.
+_SECRET_PARAMS = frozenset(
+    {
+        "listen_key",
+        "token",
+        "password",
+        "audio_token",
+        "auth",
+        "member_id",
+        "ip",
+        "masked_ipv6",
+    }
+)
 # Normal runs record only what a bug report would need; --dev opts into the
 # running commentary. Keeps an ordinary listening session writing nothing.
 _DEFAULT_LEVEL = "WARNING"
@@ -46,7 +59,7 @@ def redact_url(url: str | None) -> str:
         (key, "***" if key.lower() in _SECRET_PARAMS else value)
         for key, value in parse_qsl(parts.query, keep_blank_values=True)
     ]
-    return urlunsplit(parts._replace(query=urlencode(query)))
+    return urlunsplit(parts._replace(query=urlencode(query, safe="*")))
 
 
 def setup_logging(role: str) -> Path:

@@ -103,6 +103,27 @@ class PlayerClientTests(unittest.TestCase):
         self.assertEqual(sink.errors, [])
         self.assertEqual(sink.infos[0].channels, 2)
 
+    def test_a_connection_failure_names_the_libav_reason_without_the_secret(
+        self,
+    ) -> None:
+        # A reserved TLD never resolves, so this fails at the TCP layer, where
+        # PyAV reports only "[Errno 5] Input/output error" unless libav
+        # logging is on in the child. The query string is a signed stream URL.
+        url = "https://stream.invalid/track.mp3?purpose=playback&audio_token=s3cret"
+        sink = _Sink()
+        client = _client(sink)
+
+        client.play(url, live=False, volume=0.5)
+        self.assertTrue(sink.stopped.wait(30))
+        client.close()
+
+        self.assertEqual(len(sink.errors), 1)
+        kind, message = sink.errors[0]
+        self.assertEqual(kind, "decode")
+        self.assertIn("last error log:", message)
+        self.assertIn("stream.invalid", message)
+        self.assertNotIn("s3cret", message)
+
     def test_events_from_a_superseded_play_are_dropped(self) -> None:
         sink = _Sink()
         client = _client(sink)

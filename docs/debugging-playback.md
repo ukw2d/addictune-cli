@@ -14,6 +14,20 @@ Normal runs log at `WARNING` and the file is created lazily, so a healthy
 session writes nothing; it is capped at 512KB with one previous generation
 kept. `ADDICTUNE_LOG_FILE` moves it, `ADDICTUNE_LOG_LEVEL` overrides the level.
 
+## Connection failures
+
+The player child enables libav's log at `ERROR`, so a failed `av.open` carries
+the stage that failed after `last error log:` -- `[tcp] Failed to resolve
+hostname`, `[tls] Unable to negotiate TLS/SSL session`, `[tls] IO Error`
+(macOS: a handshake or first response that outlasted the open timeout).
+Without that line, PyAV reports every connection-level failure as a bare
+`[Errno 5] Input/output error`. An HTTP rejection is never `EIO`: it arrives
+as `HTTPForbiddenError` (`Server returned 403 Forbidden`) and the like.
+
+Stream URLs are signed (`audio_token`, `auth`, `member_id`, the client's
+`ip`), so the player redacts them with `redact_url` before any error reaches
+the log or the screen. A URL in a report should show `***` for those params.
+
 ## Reconnects
 
 A dropped live stream must end the player process — that exit is what triggers

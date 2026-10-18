@@ -10,7 +10,10 @@ from .protocol import AudioStreamInfo
 
 _log = logging.getLogger("audio.stream")
 
-_OPEN_TIMEOUT = (5.0, 2.0)
+# Open covers DNS, TCP, TLS and the first response; read is one libav read.
+# A high-latency link blew the previous 5s/2s budget, which libav reports as
+# a bare EIO.
+_OPEN_TIMEOUT = (15.0, 10.0)
 _BLOCK_FRAMES = 2048
 _ICY_CONNECT_TIMEOUT = 10.0
 _ICY_READ_TIMEOUT = 2.0
@@ -120,25 +123,21 @@ class Stream:
         """Yield float32 bytes in blocks of ``_BLOCK_FRAMES`` frames."""
         size = _BLOCK_FRAMES * self.channels * 4
         buf = bytearray()
-        try:
-            for packet in self._container.demux(self._audio):
-                if self._stop.is_set():
-                    return
-                for frame in packet.decode():
-                    for resampled in self._resampler.resample(frame):
-                        buf.extend(self._filtered(resampled))
-                    while len(buf) >= size:
-                        yield bytes(buf[:size])
-                        del buf[:size]
-                        if self._stop.is_set():
-                            return
-            for resampled in self._resampler.resample(None):
-                buf.extend(self._filtered(resampled))
-            if buf and not self._stop.is_set():
-                yield bytes(buf)
-        except self._av.FFmpegError as exc:
-            _log.error("decode failed: %s", exc)
-            raise
+        for packet in self._container.demux(self._audio):
+            if self._stop.is_set():
+                return
+            for frame in packet.decode():
+                for resampled in self._resampler.resample(frame):
+                    buf.extend(self._filtered(resampled))
+                while len(buf) >= size:
+                    yield bytes(buf[:size])
+                    del buf[:size]
+                    if self._stop.is_set():
+                        return
+        for resampled in self._resampler.resample(None):
+            buf.extend(self._filtered(resampled))
+        if buf and not self._stop.is_set():
+            yield bytes(buf)
 
     def _filtered(self, frame) -> bytes:
         self._graph.push(frame)
