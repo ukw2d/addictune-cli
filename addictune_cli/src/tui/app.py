@@ -15,7 +15,7 @@ from textual.theme import Theme
 from textual.widgets import Header, Input, ListView, Static, Tab, Tabs
 
 from ..audio.state import State
-from ..auth import load_credentials
+from ..auth import clear_credentials, load_credentials
 from ..settings import STATION_NAMES, Settings
 from .command_palette import OrderedSystemCommandsProvider
 from .services.following import (
@@ -29,6 +29,8 @@ from .services.following import (
 from .palettes import STATION_PALETTES, THEME_FIELDS
 from .presentation import (
     APP_TITLE,
+    AUTH_SIGNED_OUT,
+    AUTH_SIGNED_OUT_KEPT,
     BINDING_EXPANDED_PLAYER,
     BINDING_INFO_PANEL,
     BINDING_MUTE,
@@ -41,6 +43,9 @@ from .presentation import (
     BINDING_STOP,
     BINDING_VOLUME_DOWN,
     BINDING_VOLUME_UP,
+    SIGN_OUT_BODY,
+    SIGN_OUT_TITLE,
+    SYSTEM_SIGN_OUT,
     SYSTEM_TOGGLE_DARK,
     SYSTEM_TOGGLE_DARK_DESCRIPTION,
     TAB_CHANNELS,
@@ -575,6 +580,50 @@ class AddictuneApp(App):
         yield SystemCommand(
             "About", "Version, links and credits", self.action_about
         )
+        if self.user_id is not None or load_credentials() is not None:
+            yield SystemCommand(
+                SYSTEM_SIGN_OUT,
+                "Forget the saved login and return to the login screen",
+                self.action_sign_out,
+            )
+
+    def action_sign_out(self) -> None:
+        from .screens.dialog import ConfirmScreen
+
+        self.push_screen(
+            ConfirmScreen(
+                SIGN_OUT_TITLE.format(station=STATION_NAMES.get(self.network, "")),
+                SIGN_OUT_BODY,
+                SYSTEM_SIGN_OUT,
+            ),
+            lambda confirmed: self._sign_out() if confirmed else None,
+        )
+
+    @work(exclusive=True, group="sign-out")
+    async def _sign_out(self) -> None:
+        """Forget the account everywhere it lives, then ask for a login."""
+        # Workers still using the old session must end before it is torn down:
+        # a feature probe would re-cache the old account's tabs after the
+        # clear, and a list page failing on a closed client exits the app.
+        # Workers on other nodes (list pages) are discarded by reset_views().
+        self.workers.cancel_group(self, "default")
+        self.workers.cancel_group(self, "features")
+        self.workers.cancel_group(self, "live-status")
+        bar = self.query_one(PlaybackBar)
+        bar.forget_stream()
+        removed = clear_credentials()
+        self.user_id = None
+        self._playing_channel_id = None
+        self.track_queue = None
+        self.playing_episode_id = None
+        self._feature_cache.clear()
+        self._follow.clear()
+        await self._channels_service.reset_views()
+        old_client, self.client = self.client, Client()
+        await old_client.close()
+        while len(self.screen_stack) > 1:
+            await self.screen.dismiss()
+        self._prompt_login(AUTH_SIGNED_OUT if removed else AUTH_SIGNED_OUT_KEPT)
 
     def action_about(self) -> None:
         from .screens.about import AboutScreen
@@ -673,11 +722,11 @@ class AddictuneApp(App):
     async def recover_auth(self, network: str | None = None) -> bool:
         return await self._auth_service.recover_auth(network)
 
-    def _prompt_login(self) -> None:
+    def _prompt_login(self, notice: str = "") -> None:
         from .screens.auth import AuthScreen
 
         if not isinstance(self.screen, AuthScreen):
-            self.push_screen(AuthScreen(), self._on_auth)
+            self.push_screen(AuthScreen(notice), self._on_auth)
 
     def _on_auth(self, user_id: int | None) -> None:
         _log.info("_on_auth user_id=%s network=%r", user_id, self.network)

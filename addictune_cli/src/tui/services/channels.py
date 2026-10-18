@@ -60,6 +60,11 @@ class ChannelsService:
     # ── Reactive watcher body ────────────────────────────────────
 
     async def watch_network(self) -> None:
+        await self.reset_views()
+        self.app.load_channels()
+
+    async def reset_views(self) -> None:
+        """Empty every list and per-network cache; the caller reloads."""
         app = self.app
         tabs = app.query_one(Tabs)
         if tabs.active != "channels":
@@ -80,7 +85,6 @@ class ChannelsService:
         app.query_one("#playlists-list", PlaylistList).reset()
         app.query_one("#tracks-list", TrackList).reset()
         app._sync_feature_tabs()
-        app.load_channels()
 
     # ── @work body ───────────────────────────────────────────────
 

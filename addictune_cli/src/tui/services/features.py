@@ -44,6 +44,9 @@ class FeatureCache:
     def remember(self, network: str, features: NetworkFeatures) -> None:
         self._known[network] = features
 
+    def clear(self) -> None:
+        self._known.clear()
+
     async def detect(
         self, client: Client, network: str, *, user_id: int | None
     ) -> NetworkFeatures:

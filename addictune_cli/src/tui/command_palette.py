@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from textual.command import DiscoveryHit, Hit
 from textual.system_commands import SystemCommandsProvider
 
-from .presentation import BINDING_SETTINGS, SYSTEM_TOGGLE_DARK
+from .presentation import BINDING_SETTINGS, SYSTEM_SIGN_OUT, SYSTEM_TOGGLE_DARK
 
 
 COMMAND_PALETTE_ORDER: tuple[str, ...] = (
@@ -16,6 +16,7 @@ COMMAND_PALETTE_ORDER: tuple[str, ...] = (
     "Screenshot",
     "Keys",
     "About",
+    SYSTEM_SIGN_OUT,
     "Quit",
 )
 

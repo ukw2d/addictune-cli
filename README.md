@@ -214,7 +214,7 @@ addictune saves your AudioAddict **email and password** so it can sign you in ag
 | Linux | Secret Service (GNOME Keyring, KWallet) |
 | Windows | Credential Manager |
 
-If no credential store is available, credentials are saved in `session.json` with `0600` permissions in the config directory. To sign out, remove the saved credentials from your system's credential store and delete `session.json` if it exists.
+If no credential store is available, credentials are saved in `session.json` with `0600` permissions in the config directory. To sign out, choose **Sign out** in the command palette (`Ctrl+P`) or in **Settings → General**; it removes the saved credentials from the credential store (and `session.json`, if present) and returns to the login screen.
 
 | | macOS | Linux | Windows |
 |---|---|---|---|

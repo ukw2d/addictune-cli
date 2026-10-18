@@ -70,6 +70,11 @@ AuthScreen {
         display: block;
     }
 
+    #auth-error.-notice {
+        color: $text;
+        background: $primary 15%;
+    }
+
     #login {
         width: 100%;
         margin-top: 1;
@@ -84,6 +89,10 @@ AuthScreen {
 }
     """
     BINDINGS = [Binding("escape", "cancel", "Cancel")]
+
+    def __init__(self, notice: str = "") -> None:
+        super().__init__()
+        self._notice = notice
 
     def compose(self) -> ComposeResult:
         with VerticalScroll(id="auth-dialog", classes="modal-dialog"):
@@ -104,6 +113,9 @@ AuthScreen {
     def on_mount(self) -> None:
         dialog = self.query_one("#auth-dialog", VerticalScroll)
         dialog.border_title = AUTH_TITLE
+        if self._notice:
+            self._show_error(self._notice)
+            self.query_one("#auth-error", Static).add_class("-notice")
         self.query_one("#email", Input).focus()
 
     # ── Events ───────────────────────────────────────────────────
@@ -131,13 +143,14 @@ AuthScreen {
     def _show_error(self, message: str) -> None:
         error = self.query_one("#auth-error", Static)
         error.update(message)
+        error.remove_class("-notice")
         error.add_class("-visible")
 
     def _clear_error(self) -> None:
         error = self.query_one("#auth-error", Static)
         if error.has_class("-visible"):
             error.update("")
-            error.remove_class("-visible")
+            error.remove_class("-visible", "-notice")
 
     def _set_busy(self, busy: bool) -> None:
         self.query_one("#login", Button).loading = busy

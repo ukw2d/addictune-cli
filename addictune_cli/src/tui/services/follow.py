@@ -23,6 +23,9 @@ class FollowService:
         self.app = app
         self._live_show_follow_states: dict[tuple[str, int, int], bool] = {}
 
+    def clear(self) -> None:
+        self._live_show_follow_states.clear()
+
     def toggle_selected(self) -> None:
         app = self.app
         controller = app._active_followed_controller()

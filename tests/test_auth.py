@@ -91,6 +91,21 @@ class KeyringStoreTests(_StoreTestCase):
         auth.clear_credentials()
         self.assertFalse(auth.SESSION_FILE.exists())
 
+    def test_clearing_reports_whether_the_login_is_really_gone(self) -> None:
+        auth._store('{"email": "a@b.c", "password": "pw"}')
+        self.assertTrue(auth.clear_credentials())
+
+        class _Locked(_FakeBackend):
+            def delete_password(self, service, username):
+                raise RuntimeError("keyring locked")
+
+        self.backend = _Locked()
+        self.assertFalse(auth.clear_credentials())
+
+    def test_an_unremovable_plaintext_file_is_reported_not_raised(self) -> None:
+        with patch.object(Path, "unlink", side_effect=PermissionError):
+            self.assertFalse(auth.clear_credentials())
+
     def test_locked_keyring_behaves_like_missing(self) -> None:
         class _Denied(_FakeBackend):
             def get_password(self, service, username):

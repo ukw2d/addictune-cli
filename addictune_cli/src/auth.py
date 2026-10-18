@@ -116,13 +116,25 @@ def load_credentials() -> tuple[str, str] | None:
         return None
 
 
-def clear_credentials() -> None:
-    SESSION_FILE.unlink(missing_ok=True)  # also a pre-keychain build's plaintext copy
+def clear_credentials() -> bool:
+    """Forget the stored login. False when a copy could not be removed.
+
+    A locked keychain or a read-only config dir leaves the record behind, and
+    the next launch would sign the old account back in.
+    """
+    removed = True
+    try:
+        SESSION_FILE.unlink(missing_ok=True)  # also a pre-keychain plaintext copy
+    except OSError as exc:
+        _log.warning("session file delete failed: %r", exc)
+        removed = False
     if backend := _keyring_backend():
         try:
             backend.delete_password(_SERVICE, _KEYRING_KEY)
         except Exception as exc:  # already absent, or the keyring is locked
             _log.warning("keyring delete failed: %r", exc)
+            removed = False
+    return removed
 
 
 @functools.cache

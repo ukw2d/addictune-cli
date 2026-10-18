@@ -1,11 +1,11 @@
 from textual.app import ComposeResult
 from textual.await_complete import AwaitComplete
 from textual.containers import Horizontal, Vertical, VerticalScroll
-from textual.widgets import Footer, Label, ListItem, ListView, Select
+from textual.widgets import Button, Footer, Label, ListItem, ListView, Select
 
 from ...auth import load_credentials
 from ...settings import STATION_NAMES, Settings
-from ..presentation import ACCOUNT_FREE_HINT, ACCOUNT_TIERS
+from ..presentation import ACCOUNT_FREE_HINT, ACCOUNT_TIERS, SYSTEM_SIGN_OUT
 from .dialog import DialogScreen
 
 _SAMPLE_RATE_AUTO = 0  # sentinel: None in Settings, 0 is not a valid Hz value
@@ -105,6 +105,7 @@ class _GeneralSection(_SettingsSection):
         )
         yield Label("Account", classes="setting-label")
         yield Label(self._account(), id="account", markup=False)
+        yield Button(SYSTEM_SIGN_OUT, id="sign-out")
 
     def _account(self) -> str:
         email = (load_credentials() or ("",))[0]
@@ -160,6 +161,14 @@ SettingsScreen {
         width: 100%;
         margin-bottom: 1;
     }
+
+    #account {
+        width: 100%;
+    }
+
+    #sign-out {
+        margin-top: 1;
+    }
 }
     """
 
@@ -196,6 +205,10 @@ SettingsScreen {
         # result; inject the audio-changed flag so the app can hand the saved
         # device/sample-rate/latency to the player.
         return super().dismiss(self._audio_changed if result is None else result)
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "sign-out":
+            self.app.action_sign_out()
 
     def on_select_changed(self, event: Select.Changed) -> None:
         field = _SETTING_MAP.get(event.select.id or "")

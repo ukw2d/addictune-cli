@@ -33,6 +33,15 @@ AUTH_EMAIL_REQUIRED = "⚠  Please enter your email."
 AUTH_PASSWORD_REQUIRED = "⚠  Please enter your password."
 
 ACCOUNT_TIERS = {True: "Premium", False: "Free"}
+AUTH_SIGNED_OUT = "Signed out."
+AUTH_SIGNED_OUT_KEPT = (
+    "Signed out. The saved login could not be removed; delete it from your system's credential store."
+)
+SIGN_OUT_TITLE = "Sign out of {station}?"
+SIGN_OUT_BODY = (
+    "Your saved login is removed from this computer and playback stops."
+)
+CONFIRM_CANCEL = "Cancel"
 ACCOUNT_FREE_HINT = "Streams need a Premium subscription; see the station's website."
 
 TAB_CHANNELS = "Channels"
@@ -58,6 +67,7 @@ BINDING_PLAY = "Play"
 BINDING_BACK = "Back"
 
 SYSTEM_TOGGLE_DARK = "Toggle dark mode"
+SYSTEM_SIGN_OUT = "Sign out"
 SYSTEM_TOGGLE_DARK_DESCRIPTION = "Switch between light and dark theme"
 
 NO_TRACKS_AVAILABLE = "No tracks available"

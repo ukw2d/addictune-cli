@@ -1,6 +1,25 @@
 # Sign out
 
-Status: approved. Beads: at-ouf (after at-lx2).
+Status: implemented. Beads: at-ouf.
+
+**Implemented as** (deviations from the text below):
+- Beyond the listed resets, the stream URL is forgotten
+  (`PlaybackController.forget`): it carries the listen key, so Space would
+  otherwise resume the signed-out account's stream.
+- `ConfirmScreen` opens with **Cancel** focused (Enter backs out); Esc and a
+  click outside answer no.
+- If a copy of the login cannot be removed (`clear_credentials()` returns False: locked keychain, read-only config dir), the notice says so
+  and tells the user to delete it by hand; a wrongly "signed out" state would
+  silently log the old account back in on the next launch.
+- Workers of the old account (default group, `features`, `live-status`) are
+  cancelled before the session is torn down, the old client is closed last,
+  and open modals are dismissed (not popped) so Settings still applies a
+  changed audio device.
+- The palette entry shows while a session *or* a stored login exists, so an
+  offline start can still remove the login.
+- The per-network reset was split out of `ChannelsService.watch_network` as
+  `reset_views()` and reused.
+- Tests: `tests/test_sign_out.py` (each reset is individually mutation-checked).
 
 ## Problem
 

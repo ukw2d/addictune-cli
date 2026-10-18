@@ -13,6 +13,7 @@ def _command(title: str) -> Command:
 def test_system_commands_are_ordered_for_palette_discovery() -> None:
     commands = [
         _command("Quit"),
+        _command("Sign out"),
         _command("Screenshot"),
         _command("Settings"),
         _command("Theme"),
@@ -36,5 +37,6 @@ def test_system_commands_are_ordered_for_palette_discovery() -> None:
         "Screenshot",
         "Keys",
         "About",
+        "Sign out",
         "Quit",
     ]

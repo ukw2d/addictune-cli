@@ -456,6 +456,18 @@ class PlaybackBar(AppNode, Widget):
         self._sync_from_controller()
         self._execute_backend_command(command)
 
+    def forget_stream(self) -> None:
+        """Stop, and make the stream unresumable (sign out)."""
+        self.stop()
+        self._controller.forget()
+        self._sync_from_controller()
+        # The reset in _sync_from_controller is scoped to live playback; the
+        # last on-demand track's vote, art and OS Now Playing text are the
+        # signed-out account's too.
+        self.apply_track(track_id=None, image_url=None)
+        self.apply_live_show(show_id=None, name="")
+        self.channel_name = ""
+
     def pause(self) -> None:
         self._player.pause()
         self._controller.pause()

@@ -7,8 +7,8 @@ description links back here.
 
 | Proposal | Status | Beads |
 |---|---|---|
-| [Account tier in the UI](account-tier.md) | approved | `at-lx2` (children `at-b36` SDK, `at-i33` app) |
-| [Sign out](sign-out.md) | approved | `at-ouf` (after `at-lx2`) |
+| [Account tier in the UI](account-tier.md) | implemented | `at-lx2` (children `at-b36` SDK, `at-i33` app) |
+| [Sign out](sign-out.md) | implemented | `at-ouf` (after `at-lx2`) |
 | [Error telemetry (Sentry), opt-in](telemetry-sentry.md) | proposal | -- |
 
 Shipped without a proposal (hotfix): redaction of signed stream URLs and

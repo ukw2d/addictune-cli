@@ -91,6 +91,11 @@ class PlaybackController:
         # while playback is resumable.
         return BackendStop(self._generation, post_stopped)
 
+    def forget(self) -> None:
+        """Drop the resumable stream: its URL carries the listen key."""
+        self._url = None
+        self._now_playing = ""
+
     def pause(self) -> None:
         self._state = State.PAUSED
 
