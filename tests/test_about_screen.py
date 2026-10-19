@@ -7,14 +7,17 @@ from unittest.mock import patch
 
 from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
+from packaging.version import Version
 from textual.app import App
 from textual.widgets import Static
 
+from addictune_cli.src.update import Release
 from addictune_cli.src.tui.screens.about import AboutScreen, logo, stack_names
 
 
 class AboutTestApp(App):
     CSS_PATH = "../addictune_cli/src/tui/styles/app.tcss"
+    available_update: Release | None = None
 
 
 class AboutScreenTests(unittest.IsolatedAsyncioTestCase):
@@ -58,6 +61,38 @@ class AboutScreenTests(unittest.IsolatedAsyncioTestCase):
             if requirement.marker is None or requirement.marker.evaluate()
         }
         self.assertEqual(set(stack_names().split("  ·  ")), expected)
+
+    async def test_no_update_means_no_caption(self) -> None:
+        app = AboutTestApp()
+        async with app.run_test() as pilot:
+            app.push_screen(AboutScreen())
+            await pilot.pause()
+            self.assertEqual(list(app.screen.query("#about-update")), [])
+            dialog = " ".join(
+                str(w.render()) for w in app.screen.query("#about-dialog Static")
+            )
+            self.assertNotIn("pdate", dialog)
+
+    async def test_available_update_caption_links_to_the_release(self) -> None:
+        app = AboutTestApp()
+        app.available_update = Release(
+            Version("9.0.0"),
+            "https://github.com/ukw2d/addictune-cli/releases/tag/v9.0.0",
+        )
+        async with app.run_test() as pilot:
+            app.push_screen(AboutScreen())
+            await pilot.pause()
+            caption = app.screen.query_one("#about-update", Static)
+            text = str(caption.render())
+            self.assertIn("9.0.0", text)
+            self.assertIn("View release", text)
+            # Offsets are relative to the widget region, which includes the round border.
+            left = 1 + (caption.content_size.width - len(text)) // 2
+            with patch.object(app, "open_url") as open_url:
+                await pilot.click(caption, offset=(left + text.index("View"), 1))
+            open_url.assert_called_once_with(
+                "https://github.com/ukw2d/addictune-cli/releases/tag/v9.0.0"
+            )
 
     def test_stack_names_filter_markers_and_extras(self) -> None:
         with patch(

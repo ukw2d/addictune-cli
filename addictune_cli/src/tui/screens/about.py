@@ -114,6 +114,15 @@ AboutScreen {
         color: $text-muted;
         text-style: italic;
     }
+
+    #about-update {
+        width: 100%;
+        margin-top: 1;
+        text-align: center;
+        border: round $success;
+        color: $success;
+        text-style: bold;
+    }
 }
     """
 
@@ -133,6 +142,12 @@ AboutScreen {
                 id="about-links",
                 classes="about-row",
             )
+            if release := getattr(self.app, "available_update", None):
+                yield Static(
+                    f"⬆ Update available: v{release.version}  ·  "
+                    f"[@click=screen.open_url('{release.html_url}')]View release[/]",
+                    id="about-update",
+                )
             yield Static("Built with", id="about-built-with", classes="about-row")
             self._stack_text = stack_names()
             still = self.app.animation_level == "none"
