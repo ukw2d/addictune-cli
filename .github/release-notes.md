@@ -7,6 +7,9 @@ What's new since 0.2.1:
   report to the developer so bugs get fixed without asking you for logs. It
   never includes your email, password, listen key, account id or stream
   tokens. On by default; turn it off in **Settings → General → Error reports**.
+- **Update notifications.** addictune checks GitHub once when it starts and
+  shows a toast when a newer release is out; **About** (`Ctrl+P` → About) then
+  links to the release page. Turn the check off in **Settings → General → Updates**.
 - **Account tier.** Settings → General shows whether you're signed in with a
   Premium or Free account.
 - **Free accounts.** Premium streams now stop at once with a "Premium required"

@@ -1,7 +1,7 @@
 # Update notifications
 
-Status: proposal (revised after review: notification only; installation is a
-separate proposal, see "Phase 2"). Beads: (epic created on approval).
+Status: implemented (notification only; installation is a separate proposal,
+see "Phase 2"). Beads: at-0dk.
 
 ## Problem
 
@@ -76,11 +76,13 @@ the maximum when it is `> current`, else `None`. Any exception, non-2xx
 status or malformed body → `None` after one DEBUG log line; never a Sentry
 event.
 
-**Prerelease policy:** `prereleases = current.is_prerelease or True`. Today
-every release is a prerelease and every installed build is one, so the
-offer is always made. The parameter exists so that the day a stable release
-exists, stable users stop being offered betas by changing one literal, not
-the selection logic. No per-user channel setting.
+**Prerelease policy:** the app passes `prereleases=True`. "Prerelease" means
+PEP 440 (`0.4.0b1`), not GitHub's prerelease flag: every release here is
+flagged beta on GitHub while its tag is a plain `vX.Y.Z`, so the flag carries
+no signal for selection. The parameter exists so that once a `b`/`rc` tag
+is published, stable users can stop being offered it by changing one literal
+in `App.check_for_update`, not the selection logic. No per-user channel
+setting.
 
 Robustness required by review: a page of 30 covers the project's release
 history for years; if the API returns an empty list or only older versions,
