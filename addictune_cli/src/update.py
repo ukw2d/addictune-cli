@@ -14,11 +14,12 @@ from packaging.version import InvalidVersion, Version
 
 log = logging.getLogger("addictune_cli.update")
 
+CURRENT = Version(version("addictune-cli"))
 _RELEASES = "https://api.github.com/repos/ukw2d/addictune-cli/releases"
 _HEADERS = {
     "Accept": "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
-    "User-Agent": f"addictune-cli/{version('addictune-cli')}",
+    "User-Agent": f"addictune-cli/{CURRENT}",
 }
 
 

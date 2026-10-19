@@ -8,7 +8,7 @@ import unittest
 import httpx
 from packaging.version import Version
 
-from addictune_cli.src import update
+from addictune_cli.src.update import check  # bound before conftest patches it
 
 
 def _release(tag: str, *, draft: bool = False, pre: bool = False) -> dict:
@@ -35,7 +35,7 @@ def _serving(payload, status: int = 200) -> httpx.AsyncClient:
 class CheckTests(unittest.IsolatedAsyncioTestCase):
     async def _check(self, client, current="0.3.0", *, prereleases=True):
         async with client:
-            return await update.check(client, Version(current), prereleases=prereleases)
+            return await check(client, Version(current), prereleases=prereleases)
 
     async def test_newer_published_release_is_returned(self):
         client = _serving([_release("v0.3.1"), _release("v0.3.0"), _release("v0.2.1")])

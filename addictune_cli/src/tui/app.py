@@ -15,7 +15,7 @@ from textual.theme import Theme
 from textual.widgets import Header, Input, ListView, Static, Tab, Tabs
 
 from ..audio.state import State
-from .. import telemetry
+from .. import telemetry, update
 from ..auth import clear_credentials, load_credentials
 from ..settings import STATION_NAMES, Settings
 from .command_palette import OrderedSystemCommandsProvider
@@ -194,6 +194,8 @@ class AddictuneApp(App):
         self.set_reactive(AddictuneApp.network, self.settings.station_slug)
         self.client = Client()
         self.user_id: int | None = None
+        # Set once by check_for_update; About reads it for the rest of the session.
+        self.available_update: update.Release | None = None
         self.playing_episode_id: int | None = None
         self._playing_channel_id: int | None = None
         self._channels: list[ChannelView] = []
@@ -270,6 +272,8 @@ class AddictuneApp(App):
         self._apply_station_theme(self.network)
         telemetry.set_network(self.network)
         self.query_one(Tabs).active = self.settings.default_tab
+        if self.settings.update_check:
+            self.check_for_update()
         if load_credentials() is not None:
             self.call_after_refresh(self.load_channels)
             self._prompt_station_selection_if_needed()
@@ -308,6 +312,23 @@ class AddictuneApp(App):
         return self.query_one(PlaybackBar).state != State.STOPPED
 
     # ── Workers (bodies live in the services; @work needs a DOM node) ─────
+
+    @work(exclusive=True, group="update")
+    async def check_for_update(self) -> None:
+        import httpx
+
+        # Every installed build is a prerelease today, so offer them; flip to
+        # update.CURRENT.is_prerelease once a stable release exists.
+        async with httpx.AsyncClient() as http:
+            release = await update.check(http, update.CURRENT, prereleases=True)
+        if release is None:
+            return
+        self.available_update = release
+        self.notify(
+            f"addictune-cli {release.version} is out (you have {update.CURRENT}). "
+            "Open About for the release page.",
+            title="Update available",
+        )
 
     @work(exclusive=True)
     async def load_channels(self, _reauth: bool = True) -> None:
