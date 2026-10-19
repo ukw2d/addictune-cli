@@ -55,9 +55,13 @@ def redact_url(url: str | None) -> str:
     parts = urlsplit(url)
     if not parts.query:
         return url
+    query = parse_qsl(parts.query, keep_blank_values=True)
+    # The stream servers take the listen key as the whole query: "...?<key>".
+    if len(query) == 1 and not query[0][1]:
+        return urlunsplit(parts._replace(query="***"))
     query = [
         (key, "***" if key.lower() in _SECRET_PARAMS else value)
-        for key, value in parse_qsl(parts.query, keep_blank_values=True)
+        for key, value in query
     ]
     return urlunsplit(parts._replace(query=urlencode(query, safe="*")))
 

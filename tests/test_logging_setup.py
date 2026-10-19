@@ -32,3 +32,14 @@ class RedactUrlTests(unittest.TestCase):
         )
         for kept in ("purpose=playback", "network=di", "ip_type=6", "exp=2026-10-18"):
             self.assertIn(kept, redacted)
+
+    def test_masks_a_listen_key_passed_as_the_bare_query(self) -> None:
+        """The stream servers take the key as the whole query: ``...?<key>``."""
+        url = "http://prem2.di.fm:80/bigbeat_hi?eb247cb2e4e577f306a4a202"
+
+        self.assertEqual(redact_url(url), "http://prem2.di.fm:80/bigbeat_hi?***")
+        # libav quotes it with a trailing "=" once the query has been reparsed.
+        self.assertEqual(redact_url(url + "="), "http://prem2.di.fm:80/bigbeat_hi?***")
+
+    def test_a_named_param_without_a_value_is_not_mistaken_for_a_key(self) -> None:
+        self.assertEqual(redact_url("https://h/p?a=1&flag"), "https://h/p?a=1&flag=")

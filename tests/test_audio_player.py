@@ -330,6 +330,25 @@ class PlayerTests(unittest.TestCase):
             for secret in ("s3cret", "s1gn", "42"):
                 self.assertNotIn(secret, text)
 
+    def test_a_stream_server_failure_never_carries_the_listen_key(self) -> None:
+        """The stream servers take the key as the bare query; libav quotes it."""
+        url = "http://prem2.di.fm:80/bigbeat_hi?eb247cb2e4e577f306a4a202"
+        events = _Events()
+
+        def refused(_url, **kwargs):
+            raise OSError(1, "Server returned 401 Unauthorized", url + "=")
+
+        player = _player(events, refused)
+        with self.assertLogs("audio.player", level="ERROR") as logs:
+            player.play(1, url, live=True, volume=1.0)
+            self.assertTrue(events.done.wait(2))
+        player.close()
+
+        ((_, _, message),) = events.errors
+        for text in (message, "\n".join(logs.output)):
+            self.assertIn("prem2.di.fm:80/bigbeat_hi?***", text)
+            self.assertNotIn("eb247cb2e4e577f306a4a202", text)
+
     def test_output_failure_is_a_device_error(self) -> None:
         events = _Events()
 
