@@ -33,6 +33,11 @@ AUTH_EMAIL_REQUIRED = "⚠  Please enter your email."
 AUTH_PASSWORD_REQUIRED = "⚠  Please enter your password."
 
 ACCOUNT_TIERS = {True: "Premium", False: "Free"}
+TELEMETRY_LABEL = "Send anonymous error reports"
+TELEMETRY_HINT = (
+    "A report has the app version, OS and the error with recent log lines; "
+    "never your email, password, keys or IP address."
+)
 AUTH_SIGNED_OUT = "Signed out."
 AUTH_SIGNED_OUT_KEPT = (
     "Signed out. The saved login could not be removed; delete it from your system's credential store."

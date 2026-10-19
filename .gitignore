@@ -16,6 +16,8 @@ wheels/
 
 .env
 scripts/
+# Sentry DSN handed over locally; it is copied into the code, never committed as a file
+.sentry-dsn
 
 # Beads / Dolt files (added by bd init)
 .dolt/

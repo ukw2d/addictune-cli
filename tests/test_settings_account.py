@@ -6,9 +6,10 @@ stream fails; the row makes the tier visible before that happens.
 
 import unittest
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from textual.app import App, ComposeResult
+from textual.widgets import Switch
 
 from addictune_cli.src.media.session import NullSession
 from addictune_cli.src.tui.screens import settings as settings_module
@@ -26,6 +27,7 @@ class _App(App):
         self.settings = temp_settings(station_slug="rockradio")
         self.network = "rockradio"
         self.client = SimpleNamespace(premium=premium)
+        self.set_telemetry = Mock()
 
     def compose(self) -> ComposeResult:
         yield PlaybackBar(self.settings, media_session=NullSession())
@@ -68,3 +70,20 @@ class AccountRowTests(unittest.IsolatedAsyncioTestCase):
         text = await _account_text(True, credentials=None)
         self.assertTrue(text.startswith("Rock Radio"), text)
         self.assertNotIn("·", text)
+
+
+class TelemetryToggleTests(unittest.IsolatedAsyncioTestCase):
+    async def test_the_switch_shows_the_setting_and_applies_a_change(self) -> None:
+        app = _App(True)
+        app.settings.set(telemetry=False)
+        with patch.object(settings_module, "load_credentials", return_value=None):
+            async with app.run_test() as pilot:
+                app.query_one(PlaybackBar).request_devices = lambda callback: None
+                app.push_screen(SettingsScreen())
+                await pilot.pause()
+                switch = app.screen.query_one("#telemetry-switch", Switch)
+                self.assertFalse(switch.value)
+                switch.value = True
+                await pilot.pause()
+
+        app.set_telemetry.assert_called_once_with(True)

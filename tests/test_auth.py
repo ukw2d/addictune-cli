@@ -10,6 +10,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 from addictune_sdk import AddictuneAPIError, AddictuneAuthError
+from pydantic import SecretStr
 
 from addictune_cli.src import auth
 
@@ -32,6 +33,10 @@ def _client(login: AsyncMock) -> SimpleNamespace:
     return SimpleNamespace(login=login)
 
 
+def _auth(user_id: int, listen_key: str = "lk") -> SimpleNamespace:
+    return SimpleNamespace(user_id=user_id, listen_key=SecretStr(listen_key))
+
+
 class _StoreTestCase(unittest.IsolatedAsyncioTestCase):
     backend = None
 
@@ -44,8 +49,16 @@ class _StoreTestCase(unittest.IsolatedAsyncioTestCase):
 class FileStoreTests(_StoreTestCase):
     """Systems without a usable keyring: a 0600 file."""
 
+    async def test_login_registers_the_secrets_for_error_reports(self) -> None:
+        ok = AsyncMock(return_value=_auth(42, listen_key="lk-1"))
+        self.addCleanup(auth.telemetry.secrets.clear)
+
+        await auth.login(_client(ok), "a@b.c", "pw", "di")
+
+        self.assertEqual(auth.telemetry.secrets, {"a@b.c", "pw", "lk-1", "42"})
+
     async def test_login_stores_credentials_only_after_the_server_accepts(self) -> None:
-        ok = AsyncMock(return_value=SimpleNamespace(user_id=42))
+        ok = AsyncMock(return_value=_auth(42))
         self.assertEqual(await auth.login(_client(ok), "a@b.c", "pw", "rockradio"), 42)
         ok.assert_awaited_once_with("a@b.c", "pw", network="rockradio")
         self.assertEqual(auth.load_credentials(), ("a@b.c", "pw"))
@@ -123,7 +136,7 @@ class SignInTests(_StoreTestCase):
 
     async def test_logs_in_to_the_requested_network(self) -> None:
         auth._store('{"email": "a@b.c", "password": "pw"}')
-        login = AsyncMock(return_value=SimpleNamespace(user_id=7))
+        login = AsyncMock(return_value=_auth(7))
         self.assertEqual(await auth.sign_in(_client(login), "jazzradio"), 7)
         login.assert_awaited_once_with("a@b.c", "pw", network="jazzradio")
 

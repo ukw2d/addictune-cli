@@ -221,7 +221,9 @@ If no credential store is available, credentials are saved in `session.json` wit
 | Config | `~/Library/Application Support/addictune-cli` | `~/.config/addictune-cli` | `%LOCALAPPDATA%\addictune-cli` |
 | Logs and artwork cache | `~/Library/Caches/addictune-cli` | `~/.cache/addictune-cli` | `%LOCALAPPDATA%\addictune-cli\Cache` |
 
-addictune connects to AudioAddict's API, streaming servers and artwork servers. It does not collect analytics or telemetry.
+addictune connects to AudioAddict's API, streaming servers and artwork servers. It does not collect analytics.
+
+**Error reports.** When something breaks, addictune sends an anonymous error report to the developer's [Sentry](https://sentry.io) project so bugs can be fixed without asking you for logs. A report contains the app version, your OS, the error with its stack trace and the recent log lines leading up to it, and which station you were tuned to. It never contains your email, password, account id, listen key or stream tokens: every URL and every such value is redacted before sending (see [`telemetry.py`](addictune_cli/src/telemetry.py)), and your IP address is not stored. Reports are on by default; turn them off in **Settings → General → Error reports** (a stream that is already playing finishes under the old setting).
 
 ## 🧠 How it works
 

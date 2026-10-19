@@ -29,6 +29,8 @@ class Settings(BaseModel):
     default_tab: Literal["channels", "mixshows", "playlists"] = "channels"
     station_selected: bool = False
     station_slug: str = next(iter(STATION_NAMES))
+    # Anonymous error reports to the maintainer's Sentry project (see telemetry.py).
+    telemetry: bool = True
 
     _path: Path = PrivateAttr(default=SETTINGS_FILE)
     _debounce: float = PrivateAttr(default=_DEBOUNCE)

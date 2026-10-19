@@ -24,8 +24,30 @@ async def _check_ui() -> None:
         await pilot.pause()
 
 
+def _check_telemetry() -> None:
+    """Error reporting must survive compilation; record in memory, send nothing."""
+    import sentry_sdk
+    from sentry_sdk.transport import Transport
+
+    from . import telemetry
+
+    class _Recorder(Transport):
+        events = 0
+
+        def capture_envelope(self, envelope) -> None:
+            _Recorder.events += sum(item.type == "event" for item in envelope.items)
+
+    telemetry.init("app", True, transport=_Recorder())
+    sentry_sdk.capture_message("self-test")
+    sentry_sdk.flush(timeout=2)
+    telemetry.init("app", False)
+    if _Recorder.events != 1:
+        raise RuntimeError("error reporting did not capture an event")
+
+
 def run() -> None:
     asyncio.run(_check_ui())
+    _check_telemetry()
     argv, worker_env = worker_command("player")
     result = subprocess.run(
         argv,

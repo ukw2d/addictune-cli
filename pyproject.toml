@@ -36,6 +36,7 @@ dependencies = [
     "winrt-windows-foundation>=3.0 ; sys_platform == 'win32'",
     "winrt-windows-storage-streams>=3.0 ; sys_platform == 'win32'",
     "packaging>=24.2",
+    "sentry-sdk>=2.72",
 ]
 
 [project.urls]

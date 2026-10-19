@@ -43,9 +43,12 @@ def main() -> None:
     log = logging.getLogger("addictune_cli.startup")
     log.info("=== addictune-cli start pid=%s log=%s ===", os.getpid(), path)
 
+    from .telemetry import init as init_telemetry
     from .tui.app import AddictuneApp
 
-    AddictuneApp().run()
+    app = AddictuneApp()
+    init_telemetry("app", app.settings.telemetry)
+    app.run()
 
 
 if __name__ == "__main__":

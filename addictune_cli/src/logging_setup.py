@@ -60,8 +60,7 @@ def redact_url(url: str | None) -> str:
     if len(query) == 1 and not query[0][1]:
         return urlunsplit(parts._replace(query="***"))
     query = [
-        (key, "***" if key.lower() in _SECRET_PARAMS else value)
-        for key, value in query
+        (key, "***" if key.lower() in _SECRET_PARAMS else value) for key, value in query
     ]
     return urlunsplit(parts._replace(query=urlencode(query, safe="*")))
 
@@ -77,20 +76,29 @@ def setup_logging(role: str) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     if role == "app":
         _roll_if_oversized(path)
-    # delay=True: a healthy session that never warns creates no file at all.
-    handler = WatchedFileHandler(path, delay=True)
-    handler.setFormatter(logging.Formatter(_FORMAT))
-    handler.addFilter(_tag_role(role))
-
-    level = os.environ.get(_LOG_LEVEL_ENV, _DEFAULT_LEVEL).upper()
+    level = getattr(
+        logging, os.environ.get(_LOG_LEVEL_ENV, _DEFAULT_LEVEL).upper(), logging.WARNING
+    )
+    handler = file_handler(path, role, level)
     for name in _ROOTS:
         logger = logging.getLogger(name)
-        logger.setLevel(getattr(logging, level, logging.WARNING))
+        logger.setLevel(level)
         logger.addHandler(handler)
         # The player writes ICY titles on stdout; a record escaping to a root
         # StreamHandler would corrupt that protocol.
         logger.propagate = False
     return path
+
+
+def file_handler(path: Path, role: str, level: int) -> logging.Handler:
+    # The level sits on the handler too: error reporting lowers the loggers to
+    # INFO for breadcrumbs, and that must not make the file chattier.
+    # delay=True: a healthy session that never warns creates no file at all.
+    handler = WatchedFileHandler(path, delay=True)
+    handler.setLevel(level)
+    handler.setFormatter(logging.Formatter(_FORMAT))
+    handler.addFilter(_tag_role(role))
+    return handler
 
 
 def _roll_if_oversized(path: Path) -> None:

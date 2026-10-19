@@ -15,6 +15,7 @@ from textual.theme import Theme
 from textual.widgets import Header, Input, ListView, Static, Tab, Tabs
 
 from ..audio.state import State
+from .. import telemetry
 from ..auth import clear_credentials, load_credentials
 from ..settings import STATION_NAMES, Settings
 from .command_palette import OrderedSystemCommandsProvider
@@ -267,12 +268,26 @@ class AddictuneApp(App):
             )
         self.title = STATION_NAMES.get(self.network, APP_TITLE)
         self._apply_station_theme(self.network)
+        telemetry.set_network(self.network)
         self.query_one(Tabs).active = self.settings.default_tab
         if load_credentials() is not None:
             self.call_after_refresh(self.load_channels)
             self._prompt_station_selection_if_needed()
         else:
             self._prompt_login()
+
+    def _handle_exception(self, error: Exception) -> None:
+        # Textual's (private) funnel for every unhandled exception in handlers
+        # and workers; re-check the signature when upgrading Textual.
+        telemetry.capture(error)
+        super()._handle_exception(error)
+
+    def set_telemetry(self, enabled: bool) -> None:
+        """Apply the Settings toggle now: this process at once, the player on respawn."""
+        self.settings.set(telemetry=enabled)
+        telemetry.init("app", enabled)
+        telemetry.set_network(self.network)
+        self.query_one(PlaybackBar).restart_player_when_idle()
 
     async def on_unmount(self) -> None:
         self.settings.flush()
@@ -282,6 +297,7 @@ class AddictuneApp(App):
         # Only fires on a runtime switch; the startup value is seeded with set_reactive.
         self.title = STATION_NAMES.get(network, APP_TITLE)
         self._apply_station_theme(network)
+        telemetry.set_network(network)
         await self._channels_service.watch_network()
 
     def _apply_station_theme(self, slug: str) -> None:
@@ -729,7 +745,7 @@ class AddictuneApp(App):
             self.push_screen(AuthScreen(notice), self._on_auth)
 
     def _on_auth(self, user_id: int | None) -> None:
-        _log.info("_on_auth user_id=%s network=%r", user_id, self.network)
+        _log.info("_on_auth signed_in=%s network=%r", user_id is not None, self.network)
         if user_id is not None:
             self.user_id = user_id
             self.call_after_refresh(self.load_channels)

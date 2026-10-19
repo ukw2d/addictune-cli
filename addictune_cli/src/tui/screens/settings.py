@@ -2,11 +2,16 @@ from textual.app import ComposeResult
 from textual.await_complete import AwaitComplete
 from textual.containers import Horizontal, Vertical, VerticalScroll
 from rich.text import Text
-from textual.widgets import Footer, Label, ListItem, ListView, Select
+from textual.widgets import Footer, Label, ListItem, ListView, Select, Switch
 
 from ...auth import load_credentials
 from ...settings import STATION_NAMES, Settings
-from ..presentation import ACCOUNT_FREE_HINT, ACCOUNT_TIERS
+from ..presentation import (
+    ACCOUNT_FREE_HINT,
+    ACCOUNT_TIERS,
+    TELEMETRY_HINT,
+    TELEMETRY_LABEL,
+)
 from .dialog import DialogScreen
 
 _SAMPLE_RATE_AUTO = 0  # sentinel: None in Settings, 0 is not a valid Hz value
@@ -109,6 +114,11 @@ class _GeneralSection(_SettingsSection):
             yield Label(self._account_line(), id="account-line")
             if self.app.client.premium is False:
                 yield Label(ACCOUNT_FREE_HINT, id="account-hint")
+        yield Label("Error reports", classes="setting-label")
+        with Horizontal(id="telemetry"):
+            yield Switch(self._settings.telemetry, id="telemetry-switch")
+            yield Label(TELEMETRY_LABEL, id="telemetry-label")
+        yield Label(TELEMETRY_HINT, id="telemetry-hint")
 
     def _account_line(self) -> Text:
         email = (load_credentials() or ("",))[0]
@@ -180,6 +190,19 @@ SettingsScreen {
         color: $text-muted;
         text-style: italic;
     }
+
+    #telemetry {
+        height: auto;
+    }
+
+    #telemetry-label {
+        padding: 1 1;
+    }
+
+    #telemetry-hint {
+        color: $text-muted;
+        text-style: italic;
+    }
 }
     """
 
@@ -216,6 +239,10 @@ SettingsScreen {
         # result; inject the audio-changed flag so the app can hand the saved
         # device/sample-rate/latency to the player.
         return super().dismiss(self._audio_changed if result is None else result)
+
+    def on_switch_changed(self, event: Switch.Changed) -> None:
+        if event.switch.id == "telemetry-switch":
+            self.app.set_telemetry(event.value)
 
     def on_select_changed(self, event: Select.Changed) -> None:
         field = _SETTING_MAP.get(event.select.id or "")

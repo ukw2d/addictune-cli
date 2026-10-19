@@ -15,6 +15,8 @@ import av.logging
 from pydantic import BaseModel, ValidationError
 
 from ..logging_setup import setup_logging
+from ..telemetry import TELEMETRY_ENV
+from ..telemetry import init as init_telemetry
 from . import output, protocol
 from .player import Player
 from .stream import Stream
@@ -44,6 +46,7 @@ class _NullOutput:
 
 def main() -> None:
     setup_logging("player")
+    init_telemetry("player", os.environ.get(TELEMETRY_ENV) == "1")
     # PyAV discards libav's log by default, which leaves a connection failure as
     # a bare "[Errno 5] Input/output error". With a level set, the exception
     # carries the reason ("[tls] ...", "[tcp] Failed to resolve hostname ...").

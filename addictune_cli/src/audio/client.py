@@ -193,7 +193,13 @@ def _write(process: subprocess.Popen, command: BaseModel) -> None:
 
 
 def _spawn_worker() -> subprocess.Popen:
+    import sentry_sdk
+
+    from ..telemetry import TELEMETRY_ENV
+
     argv, env = worker_command("player")
+    # The child reports iff this process does; the app re-spawns it on toggle.
+    env[TELEMETRY_ENV] = "1" if sentry_sdk.get_client().is_active() else "0"
     return subprocess.Popen(
         argv,
         stdin=subprocess.PIPE,

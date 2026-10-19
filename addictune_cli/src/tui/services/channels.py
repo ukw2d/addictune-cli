@@ -93,9 +93,9 @@ class ChannelsService:
         app = self.app
         worker = get_current_worker()
         _log.info(
-            "load_channels start network=%r user_id=%s reauth=%s",
+            "load_channels start network=%r signed_in=%s reauth=%s",
             app.network,
-            app.user_id,
+            app.user_id is not None,
             _reauth,
         )
         channel_list = app.query_one("#channel-list", ChannelList)

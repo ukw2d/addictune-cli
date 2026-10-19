@@ -15,6 +15,7 @@ from ...audio.client import PlayerClient
 from ...audio.output import OutputConfig
 from ...audio.protocol import AudioStreamInfo
 from ...audio.state import State
+from ... import telemetry
 from ...logging_setup import redact_url
 from ...media.session import (
     Command,
@@ -175,6 +176,7 @@ class PlaybackBar(AppNode, Widget):
         # Why the last backend attempt failed, carried from the exit that
         # reported it to whichever handler decides playback is over.
         self._failure_detail: str | None = None
+        self._failure_kind = ""
         self._failure_fatal = False
 
     def compose(self) -> ComposeResult:
@@ -458,6 +460,12 @@ class PlaybackBar(AppNode, Widget):
         self._sync_from_controller()
         self._execute_backend_command(command)
 
+    def restart_player_when_idle(self) -> None:
+        """Quit the player child while stopped; the next play spawns a fresh one
+        with the current telemetry setting. Leaves a playing child alone."""
+        if self.state == State.STOPPED:
+            self._player.close()
+
     def forget_stream(self) -> None:
         """Stop, and make the stream unresumable (sign out)."""
         self.stop()
@@ -530,6 +538,7 @@ class PlaybackBar(AppNode, Widget):
             if self._controller.is_current(generation):
                 # str() alone is empty on several httpx errors, so lead with the type.
                 self._failure_detail = f"{type(exc).__name__}: {exc}"
+                self._failure_kind = "resolve"
                 self._finish_backend_exit(
                     self._controller.backend_exited(fatal=self._needs_premium())
                 )
@@ -572,6 +581,7 @@ class PlaybackBar(AppNode, Widget):
             )
             return
         self._failure_detail = message
+        self._failure_kind = kind
         # A free account's refusal reproduces on every attempt; retrying only
         # hides the reason behind two minutes of "reconnecting".
         self._failure_fatal = kind == "device" or self._needs_premium()
@@ -632,6 +642,12 @@ class PlaybackBar(AppNode, Widget):
                 timeout=PLAYBACK_ERROR_TIMEOUT,
             )
             return
+        # Once per failure the user sees, after the retries are spent.
+        telemetry.report_playback_failure(
+            kind=self._failure_kind,
+            detail=self._failure_detail,
+            content_type=self.content_type.name.lower(),
+        )
         self.app.notify(
             PLAYBACK_FAILED.format(detail=self._failure_detail),
             severity="error",
