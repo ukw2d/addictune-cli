@@ -116,7 +116,7 @@ The installed version row and the Releases link stay as they are.
 
 Settings > General: "Check for updates on start" toggle under the telemetry
 row, same style, description "Asks GitHub once per launch whether a newer
-release exists. Sends no account data."
+release exists; sends no account data."
 
 ### Flow
 

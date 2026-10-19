@@ -2,6 +2,7 @@ import logging
 from collections.abc import Iterable
 from typing import Any
 
+import httpx
 from addictune_sdk import Client
 from addictune_sdk.models.mixshow import ShowEpisode
 from addictune_sdk.models.playlist import Playlist
@@ -315,8 +316,6 @@ class AddictuneApp(App):
 
     @work(exclusive=True, group="update")
     async def check_for_update(self) -> None:
-        import httpx
-
         # Every installed build is a prerelease today, so offer them; flip to
         # update.CURRENT.is_prerelease once a stable release exists.
         async with httpx.AsyncClient() as http:
