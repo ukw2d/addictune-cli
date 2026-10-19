@@ -105,6 +105,10 @@ DialogScreen {
     padding: 0;
 }
 
+#confirm-dialog.modal-dialog {
+    padding: 1 2;
+}
+
 .modal-dialog Footer {
     width: 100%;
     height: auto;

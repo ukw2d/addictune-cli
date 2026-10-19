@@ -21,7 +21,8 @@ class ConfirmScreen(ModalScreen[bool]):
     """Yes/no for a destructive action: True only for the confirm button.
 
     Cancel has focus, so a stray Enter backs out; Esc and a click outside
-    the dialog are a no.
+    the dialog are a no. Both buttons are 16 cells wide, so *confirm_label*
+    fits 12 characters.
     """
 
     DEFAULT_CSS = """
@@ -33,17 +34,18 @@ class ConfirmScreen(ModalScreen[bool]):
         }
 
         #confirm-body {
+            text-align: center;
             margin-bottom: 1;
         }
 
         #confirm-buttons {
             height: auto;
-            align-horizontal: right;
-            margin-bottom: 1;
+            align-horizontal: center;
         }
 
         Button {
-            margin-left: 2;
+            width: 16;
+            margin: 0 1;
         }
     }
     """
