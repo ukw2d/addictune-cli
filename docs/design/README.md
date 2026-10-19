@@ -10,6 +10,7 @@ description links back here.
 | [Account tier in the UI](account-tier.md) | implemented | `at-lx2` (children `at-b36` SDK, `at-i33` app) |
 | [Sign out](sign-out.md) | implemented | `at-ouf` (after `at-lx2`) |
 | [Error telemetry (Sentry)](telemetry-sentry.md) | implemented (on by default) | `at-rl5` |
+| [Update notifications](auto-update.md) | proposal (notification only; install deferred) | -- |
 
 Shipped without a proposal (hotfix): redaction of signed stream URLs and
 libav failure reasons in playback errors -- see
