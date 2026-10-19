@@ -38,6 +38,10 @@ TELEMETRY_HINT = (
     "A report has the app version, OS and the error with recent log lines; "
     "never your email, password, keys or IP address."
 )
+UPDATE_CHECK_LABEL = "Check for updates on start"
+UPDATE_CHECK_HINT = (
+    "Asks GitHub once per launch whether a newer release exists; sends no account data."
+)
 AUTH_SIGNED_OUT = "Signed out."
 AUTH_SIGNED_OUT_KEPT = (
     "Signed out. The saved login could not be removed; delete it from your system's credential store."

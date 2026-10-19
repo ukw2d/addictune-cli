@@ -87,3 +87,21 @@ class TelemetryToggleTests(unittest.IsolatedAsyncioTestCase):
                 await pilot.pause()
 
         app.set_telemetry.assert_called_once_with(True)
+
+
+class UpdateCheckToggleTests(unittest.IsolatedAsyncioTestCase):
+    async def test_the_switch_shows_the_setting_and_saves_a_change(self) -> None:
+        app = _App(True)
+        self.assertTrue(app.settings.update_check)
+        with patch.object(settings_module, "load_credentials", return_value=None):
+            async with app.run_test() as pilot:
+                app.query_one(PlaybackBar).request_devices = lambda callback: None
+                app.push_screen(SettingsScreen())
+                await pilot.pause()
+                switch = app.screen.query_one("#update-check-switch", Switch)
+                self.assertTrue(switch.value)
+                switch.value = False
+                await pilot.pause()
+
+        self.assertFalse(app.settings.update_check)
+        app.set_telemetry.assert_not_called()

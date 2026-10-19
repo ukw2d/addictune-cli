@@ -11,6 +11,8 @@ from ..presentation import (
     ACCOUNT_TIERS,
     TELEMETRY_HINT,
     TELEMETRY_LABEL,
+    UPDATE_CHECK_HINT,
+    UPDATE_CHECK_LABEL,
 )
 from .dialog import DialogScreen
 
@@ -119,6 +121,11 @@ class _GeneralSection(_SettingsSection):
             yield Switch(self._settings.telemetry, id="telemetry-switch")
             yield Label(TELEMETRY_LABEL, id="telemetry-label")
         yield Label(TELEMETRY_HINT, id="telemetry-hint")
+        yield Label("Updates", classes="setting-label")
+        with Horizontal(id="update-check"):
+            yield Switch(self._settings.update_check, id="update-check-switch")
+            yield Label(UPDATE_CHECK_LABEL, id="update-check-label")
+        yield Label(UPDATE_CHECK_HINT, id="update-check-hint")
 
     def _account_line(self) -> Text:
         email = (load_credentials() or ("",))[0]
@@ -191,15 +198,15 @@ SettingsScreen {
         text-style: italic;
     }
 
-    #telemetry {
+    #telemetry, #update-check {
         height: auto;
     }
 
-    #telemetry-label {
+    #telemetry-label, #update-check-label {
         padding: 1 1;
     }
 
-    #telemetry-hint {
+    #telemetry-hint, #update-check-hint {
         color: $text-muted;
         text-style: italic;
     }
@@ -243,6 +250,8 @@ SettingsScreen {
     def on_switch_changed(self, event: Switch.Changed) -> None:
         if event.switch.id == "telemetry-switch":
             self.app.set_telemetry(event.value)
+        elif event.switch.id == "update-check-switch":
+            self.app.settings.set(update_check=event.value)
 
     def on_select_changed(self, event: Select.Changed) -> None:
         field = _SETTING_MAP.get(event.select.id or "")

@@ -31,6 +31,8 @@ class Settings(BaseModel):
     station_slug: str = next(iter(STATION_NAMES))
     # Anonymous error reports to the maintainer's Sentry project (see telemetry.py).
     telemetry: bool = True
+    # Ask GitHub once per launch whether a newer release exists (see update.py).
+    update_check: bool = True
 
     _path: Path = PrivateAttr(default=SETTINGS_FILE)
     _debounce: float = PrivateAttr(default=_DEBOUNCE)
