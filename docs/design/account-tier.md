@@ -8,10 +8,15 @@ Status: implemented. Beads: at-lx2.
   `AuthResponse.premium` and `Client.premium` (addictune-sdk 0.4.2).
 - No `app.account_tier`: the app reads `client.premium`, which every login
   (form, silent sign-in, recovery) refreshes.
-- Free-tier notice matches the refusal on both failure paths ("Forbidden"
-  from libav, `AddictuneAuthError` from the playlist fetch):
-  "This stream needs a Premium subscription (signed in as Free)."
-- The Sign out button is part of the sign-out epic (`at-ouf`).
+- The stream server answers a free account with **401** (verified with a real
+  free account), the CDN with 403, the playlist fetch with
+  `AddictuneAuthError`. All three count as a refusal; for a free account it is
+  fatal (no live reconnect loop) and shows one warning toast,
+  "Premium required", mentioning the station's 30-day trial.
+- The free `public3` tier is gone (its hosts no longer resolve), so there is
+  no fallback stream to offer.
+- The Account row is a bordered panel with a Premium/Free badge and an italic
+  hint for Free.
 - Tests: `tests/test_settings_account.py`, `tests/test_playback_failure_reporting.py`.
 
 ## Problem

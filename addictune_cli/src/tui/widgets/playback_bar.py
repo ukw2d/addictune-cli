@@ -39,6 +39,7 @@ from ..presentation import (
     PLAYBACK_ERROR_TIMEOUT,
     PLAYBACK_FAILED,
     PLAYBACK_NEEDS_PREMIUM,
+    PLAYBACK_NEEDS_PREMIUM_TITLE,
     PLAYBACK_RECONNECTING,
     PLAYBACK_SEPARATOR,
     PLAYBACK_STATE_ICONS,
@@ -77,9 +78,10 @@ def _hires_artwork_url(url: str | None, size: int = _ARTWORK_SIZE) -> str:
 
 _VOLUME_STEP = 5
 SEEK_STEP = 10
-# How a refused stream reads in _failure_detail: libav names the HTTP status,
-# a refused playlist fetch is reported by exception type.
-_AUTH_REFUSAL_MARKERS = ("Forbidden", "AddictuneAuthError")
+# How a refused stream reads in _failure_detail: libav names the HTTP status
+# (the stream server answers 401, the CDN 403), a refused playlist fetch is
+# reported by exception type.
+_AUTH_REFUSAL_MARKERS = ("Unauthorized", "Forbidden", "AddictuneAuthError")
 _log = logging.getLogger("addictune_cli.playback_bar")
 
 
@@ -528,7 +530,9 @@ class PlaybackBar(AppNode, Widget):
             if self._controller.is_current(generation):
                 # str() alone is empty on several httpx errors, so lead with the type.
                 self._failure_detail = f"{type(exc).__name__}: {exc}"
-                self._finish_backend_exit(self._controller.backend_exited())
+                self._finish_backend_exit(
+                    self._controller.backend_exited(fatal=self._needs_premium())
+                )
             return
         if not self._controller.is_current(generation):
             return
@@ -568,7 +572,9 @@ class PlaybackBar(AppNode, Widget):
             )
             return
         self._failure_detail = message
-        self._failure_fatal = kind == "device"
+        # A free account's refusal reproduces on every attempt; retrying only
+        # hides the reason behind two minutes of "reconnecting".
+        self._failure_fatal = kind == "device" or self._needs_premium()
 
     def _on_player_position(self, seconds: float) -> None:
         if self.content_type == ContentType.LIVE:
@@ -618,16 +624,24 @@ class PlaybackBar(AppNode, Widget):
         """Surface why playback ended, unless it ended cleanly."""
         if self._failure_detail is None:
             return
-        # A free account's premium stream is refused rather than broken.
-        needs_premium = self.app.client.premium is False and any(
-            marker in self._failure_detail for marker in _AUTH_REFUSAL_MARKERS
-        )
+        if self._needs_premium():
+            self.app.notify(
+                PLAYBACK_NEEDS_PREMIUM,
+                title=PLAYBACK_NEEDS_PREMIUM_TITLE,
+                severity="warning",
+                timeout=PLAYBACK_ERROR_TIMEOUT,
+            )
+            return
         self.app.notify(
-            PLAYBACK_NEEDS_PREMIUM
-            if needs_premium
-            else PLAYBACK_FAILED.format(detail=self._failure_detail),
+            PLAYBACK_FAILED.format(detail=self._failure_detail),
             severity="error",
             timeout=PLAYBACK_ERROR_TIMEOUT,
+        )
+
+    def _needs_premium(self) -> bool:
+        """A free account's premium stream is refused rather than broken."""
+        return self.app.client.premium is False and any(
+            marker in (self._failure_detail or "") for marker in _AUTH_REFUSAL_MARKERS
         )
 
     def _sync_from_controller(self) -> None:

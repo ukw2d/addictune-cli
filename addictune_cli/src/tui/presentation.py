@@ -42,7 +42,7 @@ SIGN_OUT_BODY = (
     "Your saved login is removed from this computer and playback stops."
 )
 CONFIRM_CANCEL = "Cancel"
-ACCOUNT_FREE_HINT = "Streams need a Premium subscription; see the station's website."
+ACCOUNT_FREE_HINT = "Streams need a Premium subscription — 30-day free trial on the station's website."
 
 TAB_CHANNELS = "Channels"
 TAB_MIXSHOWS = "Mixshows"
@@ -74,7 +74,11 @@ NO_TRACKS_AVAILABLE = "No tracks available"
 PLAYLIST_SKIP_UNAVAILABLE = "Finish this playlist set before loading another."
 PLAYLIST_NO_NEW_TRACKS = "No new playlist tracks are available yet."
 PLAYBACK_FAILED = "Playback failed: {detail}"
-PLAYBACK_NEEDS_PREMIUM = "This stream needs a Premium subscription (signed in as Free)."
+PLAYBACK_NEEDS_PREMIUM_TITLE = "Premium required"
+PLAYBACK_NEEDS_PREMIUM = (
+    "You're signed in with a Free account. Streams need a Premium subscription "
+    "— the station's website offers a 30-day free trial."
+)
 PLAYBACK_RECONNECTING = "Stream dropped — reconnecting…"
 # Failures are the one notification worth reading in full before it fades.
 PLAYBACK_ERROR_TIMEOUT = 10.0

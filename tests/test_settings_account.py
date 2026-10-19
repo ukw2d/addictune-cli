@@ -9,7 +9,6 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from textual.app import App, ComposeResult
-from textual.widgets import Label
 
 from addictune_cli.src.media.session import NullSession
 from addictune_cli.src.tui.screens import settings as settings_module
@@ -42,7 +41,9 @@ async def _account_text(
             app.query_one(PlaybackBar).request_devices = lambda callback: None
             app.push_screen(SettingsScreen())
             await pilot.pause()
-            return str(app.screen.query_one("#account", Label).render())
+            return " ".join(
+                str(label.render()) for label in app.screen.query("#account Label")
+            )
 
 
 class AccountRowTests(unittest.IsolatedAsyncioTestCase):
@@ -64,6 +65,6 @@ class AccountRowTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("Free", text)
 
     async def test_without_stored_credentials_the_row_has_no_empty_field(self) -> None:
-        self.assertEqual(
-            await _account_text(True, credentials=None), "Rock Radio · Premium"
-        )
+        text = await _account_text(True, credentials=None)
+        self.assertTrue(text.startswith("Rock Radio"), text)
+        self.assertNotIn("·", text)

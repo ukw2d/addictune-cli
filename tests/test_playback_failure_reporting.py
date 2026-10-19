@@ -12,6 +12,8 @@ from unittest import mock
 
 from textual.app import App, ComposeResult
 
+from addictune_sdk import AddictuneAuthError
+
 from addictune_cli.src.audio import protocol
 from addictune_cli.src.audio.state import State
 from addictune_cli.src.media.session import NullSession
@@ -24,6 +26,7 @@ from addictune_cli.src.tui.services.playback_policy import (
     ScheduleRetry,
     retry_delay,
 )
+from addictune_cli.src.tui.presentation import PLAYBACK_NEEDS_PREMIUM
 from addictune_cli.src.tui.types import ContentType
 from addictune_cli.src.tui.widgets.playback_bar import PlaybackBar
 
@@ -31,14 +34,19 @@ from support import temp_settings
 
 
 class _ResolutionApp(App):
-    def __init__(self, resolve) -> None:
+    def __init__(self, resolve, *, premium: bool | None = None) -> None:
         super().__init__()
         self.network = "di"
         self.client = SimpleNamespace(
+            premium=premium,
+            listen_key=None,
             network=lambda _network: SimpleNamespace(
                 channels=SimpleNamespace(resolve_stream_url=resolve)
-            )
+            ),
         )
+
+    async def recover_auth(self, network: str | None = None) -> bool:
+        return True  # a free account's login is valid; the key is simply not premium
 
     def compose(self) -> ComposeResult:
         yield PlaybackBar(temp_settings(), media_session=NullSession())
@@ -106,6 +114,95 @@ class PlaybackSelectionTests(unittest.IsolatedAsyncioTestCase):
             )
 
 
+class FreeAccountRefusalTests(unittest.IsolatedAsyncioTestCase):
+    """The stream server answers a free account's premium stream with 401.
+
+    For a live channel that used to enter the reconnect loop: two minutes of
+    "Stream dropped" and twelve more refusals before the real reason showed.
+    """
+
+    _REFUSED = (
+        "[Errno 825242872] Server returned 401 Unauthorized (authorization "
+        "failed): 'http://prem2.example/bigbeat_hi?***'"
+    )
+
+    async def _bar(self, premium: bool | None, resolve) -> tuple[list, PlaybackBar]:
+        app = _ResolutionApp(resolve, premium=premium)
+        toasts: list = []
+        async with app.run_test():
+            app.notify = lambda message, **kw: toasts.append((message, kw))
+            bar = app.query_one(PlaybackBar)
+            bar._player.play = mock.Mock()
+            bar._player.stop = mock.Mock()
+            yield toasts, bar
+
+    async def _refused_live_play(self, premium: bool | None) -> tuple[list, PlaybackBar]:
+        async for toasts, bar in self._bar(premium, mock.AsyncMock()):
+            bar._controller.play("http://stream", "Big Beat", ContentType.LIVE)
+            bar._on_player_error("decode", self._REFUSED)
+            bar._on_player_state(State.STOPPED)
+            return toasts, bar
+
+    async def _refused_resolution(self, premium: bool | None) -> tuple[list, PlaybackBar]:
+        refuse = mock.AsyncMock(side_effect=AddictuneAuthError("Access Denied"))
+        async for toasts, bar in self._bar(premium, refuse):
+            bar.content_type = ContentType.LIVE
+            bar.play("http://listen.example/x.pls?listen_key=k", title="Big Beat")
+            await bar.app.workers.wait_for_complete()
+            return toasts, bar
+
+    async def test_a_free_account_stops_at_once_with_the_premium_notice(self) -> None:
+        toasts, bar = await self._refused_live_play(False)
+
+        self.assertEqual(bar.state, State.STOPPED)
+        self.assertEqual(len(toasts), 1)
+        message, kwargs = toasts[0]
+        self.assertIn("Premium", message)
+        self.assertIn("trial", message)
+        self.assertNotIn("401", message)
+        self.assertEqual(kwargs.get("severity"), "warning")
+
+    async def test_a_premium_account_still_gets_the_reconnect_policy(self) -> None:
+        toasts, bar = await self._refused_live_play(True)
+
+        self.assertEqual(bar.state, State.LOADING)
+        self.assertEqual([m for m, _ in toasts], ["Stream dropped \u2014 reconnecting\u2026"])
+
+    async def test_a_cdn_refusal_counts_too(self) -> None:
+        async for toasts, bar in self._bar(False, mock.AsyncMock()):
+            bar._controller.play("http://t", "Track", ContentType.TRACK)
+            bar._on_player_error("decode", "Server returned 403 Forbidden: 'https://x'")
+            bar._on_player_state(State.STOPPED)
+
+        self.assertEqual([m for m, _ in toasts], [PLAYBACK_NEEDS_PREMIUM])
+
+    async def test_a_free_account_still_sees_a_real_network_error(self) -> None:
+        async for toasts, bar in self._bar(False, mock.AsyncMock()):
+            bar._controller.play("http://t", "Track", ContentType.TRACK)
+            bar._on_player_error("decode", "[Errno 5] Input/output error: 'https://x'")
+            bar._on_player_state(State.STOPPED)
+
+        self.assertIn("Input/output error", toasts[0][0])
+        self.assertNotIn("Premium", toasts[0][0])
+
+    async def test_a_refused_playlist_fetch_stops_a_free_account_too(self) -> None:
+        toasts, bar = await self._refused_resolution(False)
+
+        self.assertEqual(bar.state, State.STOPPED)
+        self.assertEqual([m for m, _ in toasts], [PLAYBACK_NEEDS_PREMIUM])
+
+    async def test_an_unknown_tier_sees_the_real_error_when_playback_ends(self) -> None:
+        # Stays on the reconnect policy; the detail surfaces once retries are spent.
+        toasts, bar = await self._refused_live_play(None)
+        bar._controller._retry_attempts = MAX_RETRY_ATTEMPTS
+        bar._on_player_error("decode", self._REFUSED)
+        bar._on_player_state(State.STOPPED)
+
+        self.assertEqual(bar.state, State.STOPPED)
+        self.assertIn("401", toasts[-1][0])
+        self.assertNotIn("Premium", toasts[-1][0])
+
+
 class StoppedReasonTests(unittest.TestCase):
     def _bar(self, messages: list) -> SimpleNamespace:
         return SimpleNamespace(
@@ -113,39 +210,6 @@ class StoppedReasonTests(unittest.TestCase):
             _player=mock.Mock(),
             post_message=messages.append,
         )
-
-    def _failure_toast(self, premium: bool | None, detail: str) -> str:
-        bar = SimpleNamespace(
-            app=SimpleNamespace(
-                notify=mock.Mock(), client=SimpleNamespace(premium=premium)
-            ),
-            _failure_detail=detail,
-        )
-        PlaybackBar._notify_playback_failure(bar)
-        return bar.app.notify.call_args.args[0]
-
-    def test_a_free_account_is_told_it_needs_premium(self) -> None:
-        """A premium stream is refused by libav on one path, by the SDK on the other."""
-        for detail in (
-            "[Errno 858797304] Server returned 403 Forbidden (access denied): 'https://x'",
-            "AddictuneAuthError: Forbidden",
-        ):
-            with self.subTest(detail=detail):
-                message = self._failure_toast(False, detail)
-                self.assertIn("Premium", message)
-                self.assertNotIn("Forbidden", message)
-
-    def test_other_accounts_and_other_failures_see_the_real_error(self) -> None:
-        refused = "Server returned 403 Forbidden"
-        for premium, detail in (
-            (True, refused),
-            (None, refused),
-            (False, "[Errno 5] Input/output error: 'https://x'"),
-        ):
-            with self.subTest(premium=premium, detail=detail):
-                self.assertEqual(
-                    self._failure_toast(premium, detail), f"Playback failed: {detail}"
-                )
 
     def test_backend_stop_preserves_natural_completion_reason(self) -> None:
         messages: list = []

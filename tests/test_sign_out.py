@@ -11,7 +11,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
 from textual.app import App, ComposeResult
-from textual.widgets import Button, Static
+from textual.widgets import Static
 
 from addictune_cli.src.media.session import NullSession
 from addictune_cli.src.settings import Settings
@@ -20,12 +20,10 @@ from addictune_cli.src.tui.presentation import AUTH_SIGNED_OUT, SYSTEM_SIGN_OUT
 from addictune_cli.src.tui.screens.about import AboutScreen
 from addictune_cli.src.tui.screens.auth import AuthScreen
 from addictune_cli.src.tui.screens.dialog import ConfirmScreen
-from addictune_cli.src.tui.screens.settings import SettingsScreen
 from addictune_cli.src.tui.services.features import FeatureCache
 from addictune_cli.src.tui.types import ContentType
 from addictune_cli.src.tui.widgets.playback_bar import PlaybackBar
 
-from support import temp_settings
 
 _APP = "addictune_cli.src.tui.app"
 
@@ -252,38 +250,6 @@ class AuthScreenNoticeTests(unittest.IsolatedAsyncioTestCase):
 
             await pilot.press("a")
             self.assertFalse(error.has_class("-visible"))
-
-
-class SettingsButtonTests(unittest.IsolatedAsyncioTestCase):
-    async def test_the_account_section_has_a_sign_out_button(self) -> None:
-        class _Host(App):
-            CSS_PATH = "../addictune_cli/src/tui/styles/app.tcss"
-
-            def __init__(self) -> None:
-                super().__init__()
-                self.settings = temp_settings()
-                self.network = "di"
-                self.client = SimpleNamespace(premium=True)
-                self.action_sign_out = Mock()
-
-            def compose(self) -> ComposeResult:
-                yield PlaybackBar(self.settings, media_session=NullSession())
-
-        app = _Host()
-        with patch(
-            "addictune_cli.src.tui.screens.settings.load_credentials",
-            return_value=("a@b.c", "pw"),
-        ):
-            async with app.run_test() as pilot:
-                app.query_one(PlaybackBar).request_devices = lambda callback: None
-                app.push_screen(SettingsScreen())
-                await pilot.pause()
-                button = app.screen.query_one("#sign-out", Button)
-                self.assertEqual(str(button.label), "Sign out")
-                button.press()
-                await pilot.pause()
-
-        app.action_sign_out.assert_called_once_with()
 
 
 if __name__ == "__main__":

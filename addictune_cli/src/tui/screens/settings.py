@@ -1,11 +1,12 @@
 from textual.app import ComposeResult
 from textual.await_complete import AwaitComplete
 from textual.containers import Horizontal, Vertical, VerticalScroll
-from textual.widgets import Button, Footer, Label, ListItem, ListView, Select
+from rich.text import Text
+from textual.widgets import Footer, Label, ListItem, ListView, Select
 
 from ...auth import load_credentials
 from ...settings import STATION_NAMES, Settings
-from ..presentation import ACCOUNT_FREE_HINT, ACCOUNT_TIERS, SYSTEM_SIGN_OUT
+from ..presentation import ACCOUNT_FREE_HINT, ACCOUNT_TIERS
 from .dialog import DialogScreen
 
 _SAMPLE_RATE_AUTO = 0  # sentinel: None in Settings, 0 is not a valid Hz value
@@ -104,16 +105,21 @@ class _GeneralSection(_SettingsSection):
             id="default-tab-select",
         )
         yield Label("Account", classes="setting-label")
-        yield Label(self._account(), id="account", markup=False)
-        yield Button(SYSTEM_SIGN_OUT, id="sign-out")
+        with Vertical(id="account"):
+            yield Label(self._account_line(), id="account-line")
+            if self.app.client.premium is False:
+                yield Label(ACCOUNT_FREE_HINT, id="account-hint")
 
-    def _account(self) -> str:
+    def _account_line(self) -> Text:
         email = (load_credentials() or ("",))[0]
         premium = self.app.client.premium
         station = STATION_NAMES.get(self.app.network, self.app.network)
-        tier = None if premium is None else ACCOUNT_TIERS[premium]
-        line = " · ".join(part for part in (email, station, tier) if part)
-        return f"{line}\n{ACCOUNT_FREE_HINT}" if premium is False else line
+        line = Text(" · ".join(part for part in (email, station) if part))
+        if premium is not None:
+            badge = ACCOUNT_TIERS[premium]
+            line.append("  ")
+            line.append(f" {badge} ", style="bold reverse " + ("green" if premium else "yellow"))
+        return line
 
 
 _SECTIONS: list[tuple[str, type[_SettingsSection]]] = [
@@ -163,11 +169,16 @@ SettingsScreen {
     }
 
     #account {
+        height: auto;
         width: 100%;
+        padding: 0 1;
+        border-left: heavy $primary;
+        background: $boost;
     }
 
-    #sign-out {
-        margin-top: 1;
+    #account-hint {
+        color: $text-muted;
+        text-style: italic;
     }
 }
     """
@@ -205,10 +216,6 @@ SettingsScreen {
         # result; inject the audio-changed flag so the app can hand the saved
         # device/sample-rate/latency to the player.
         return super().dismiss(self._audio_changed if result is None else result)
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "sign-out":
-            self.app.action_sign_out()
 
     def on_select_changed(self, event: Select.Changed) -> None:
         field = _SETTING_MAP.get(event.select.id or "")

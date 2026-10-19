@@ -17,6 +17,8 @@ Status: implemented. Beads: at-ouf.
   changed audio device.
 - The palette entry shows while a session *or* a stored login exists, so an
   offline start can still remove the login.
+- The Settings button was dropped after use: the palette entry is enough,
+  and Settings > General stays a read-only account panel.
 - The per-network reset was split out of `ChannelsService.watch_network` as
   `reset_views()` and reused.
 - Tests: `tests/test_sign_out.py` (each reset is individually mutation-checked).
