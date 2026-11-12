@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from addictune_sdk import AddictuneAuthError
+from addictune_sdk import AddictuneAppAuthError, AddictuneAuthError
 from textual.app import App
 from textual.widgets import Input, Static
 
@@ -19,6 +19,10 @@ class _App(App):
 
 async def _fail_422(*args, **kwargs):
     raise AddictuneAuthError("invalid credentials")
+
+
+async def _fail_application(*args, **kwargs):
+    raise AddictuneAppAuthError(401, "Application authentication rejected")
 
 
 async def _fail_network(*args, **kwargs):
@@ -52,7 +56,23 @@ class AuthErrorBannerTests(unittest.IsolatedAsyncioTestCase):
                 f"banner hidden; classes={list(error.classes)}",
             )
             self.assertTrue(error.display)
+            self.assertEqual(str(error.render()), "⚠  Invalid email or password. Please try again.")
             self.assertEqual(screen.query_one("#password", Input).value, "")
+
+    async def test_application_rejection_does_not_blame_password(self) -> None:
+        app = _App()
+        async with app.run_test() as pilot:
+            screen = AuthScreen()
+            await app.push_screen(screen)
+            await pilot.pause()
+            await self._submit(pilot, screen, _fail_application)
+            error = screen.query_one("#auth-error", Static)
+            self.assertTrue(error.has_class("-visible"))
+            self.assertEqual(
+                str(error.render()),
+                "DI.FM rejected application authentication (HTTP 401). "
+                "Your account credentials could not be checked.",
+            )
 
     async def test_banner_stays_visible_after_generic_failure(self) -> None:
         app = _App()

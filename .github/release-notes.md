@@ -1,18 +1,22 @@
-**addictune 0.3.1**, an authentication hotfix for the unofficial terminal client
-for DI.FM and other AudioAddict radio networks.
+**addictune 0.3.2**, an authentication error-reporting hotfix for the unofficial
+terminal client for DI.FM and other AudioAddict radio networks.
 
-## Fixed since 0.3.0
+## Fixed since 0.3.1
 
-- **Sign-in restored.** Requires `addictune-sdk>=0.4.3`, which replaces the
-  application authentication identity rejected by AudioAddict's API gateway.
-  The gateway rejection could previously appear as “Invalid email or password”
-  even when the account credentials were correct.
-- SDK session creation was verified on DI.FM, RadioTunes, ROCKRADIO, JAZZRADIO,
-  Classical Radio and ZenRadio, plus an authenticated DI.FM member request.
+- **Application rejection no longer blames your password.** With SDK 0.4.4,
+  a member-session HTTP 401 Basic challenge is distinguished from invalid
+  account credentials. The login form and automatic sign-in report the
+  affected network and HTTP status, for example:
+  “DI.FM rejected application authentication (HTTP 401). Your account
+  credentials could not be checked.”
+- **Saved credentials are preserved** on application rejection, rather than
+  deleted and followed by a request for another password.
+- Ordinary invalid-credential handling remains unchanged. Remote response
+  bodies are not displayed for application rejection.
 
-No account migration or password change is needed. This release restores login;
-it does not yet change the UI's authentication error classification. The API's
-application identity is undocumented and could be revoked again.
+The SDK's application identity remains a single constant for future rotation.
+It is undocumented and could be revoked again. No password change or account
+migration is required for this update.
 
 Downloads include Apple Silicon and Intel macOS installers, a Linux x86_64
 archive, and a Windows x64 archive. `SHA256SUMS` contains their checksums.

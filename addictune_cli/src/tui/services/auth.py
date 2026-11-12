@@ -10,8 +10,11 @@ else prompt.
 import logging
 from typing import TYPE_CHECKING
 
+from addictune_sdk import AddictuneAppAuthError
+
 from ...auth import sign_in
-from ..presentation import AUTH_ERROR_GENERIC
+from ...settings import STATION_NAMES
+from ..presentation import AUTH_ERROR_APPLICATION, AUTH_ERROR_GENERIC
 
 if TYPE_CHECKING:
     from ..app import AddictuneApp
@@ -40,6 +43,15 @@ class AuthRecoveryService:
         app = self.app
         try:
             user_id = await sign_in(app.client, network or app.network)
+        except AddictuneAppAuthError as exc:
+            slug = network or app.network
+            app.notify(
+                AUTH_ERROR_APPLICATION.format(
+                    network=STATION_NAMES.get(slug, slug), status=exc.status_code
+                ),
+                severity="error",
+            )
+            return False
         except Exception as exc:
             _log.warning("sign-in failed: %r", exc)
             app.notify(AUTH_ERROR_GENERIC, severity="error")

@@ -9,7 +9,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
-from addictune_sdk import AddictuneAPIError, AddictuneAuthError
+import httpx
+from addictune_sdk import AddictuneAPIError, AddictuneAppAuthError, AddictuneAuthError, Client
 from pydantic import SecretStr
 
 from addictune_cli.src import auth
@@ -99,6 +100,22 @@ class KeyringStoreTests(_StoreTestCase):
         auth._store('{"email": "a@b.c", "password": "new"}')
         self.assertFalse(auth.SESSION_FILE.exists())
 
+    async def test_application_challenge_keeps_keyring_credentials(self) -> None:
+        auth._store('{"email": "a@b.c", "password": "pw"}')
+        async with Client() as client:
+            await client._http_client.aclose()
+            client._http_client = httpx.AsyncClient(
+                base_url="https://api.example.test/v1",
+                transport=httpx.MockTransport(
+                    lambda request: httpx.Response(
+                        401, headers={"WWW-Authenticate": 'Basic realm="radio"'}
+                    )
+                ),
+            )
+            with self.assertRaises(AddictuneAppAuthError):
+                await auth.sign_in(client, "di")
+        self.assertEqual(auth.load_credentials(), ("a@b.c", "pw"))
+
     def test_clearing_also_removes_a_stale_plaintext_file(self) -> None:
         auth.SESSION_FILE.write_text('{"email": "a@b.c", "password": "old"}')
         auth.clear_credentials()
@@ -145,6 +162,14 @@ class SignInTests(_StoreTestCase):
         login = AsyncMock(side_effect=AddictuneAuthError("no"))
         self.assertIsNone(await auth.sign_in(_client(login), "di"))
         self.assertIsNone(auth.load_credentials())
+
+    async def test_application_rejection_keeps_saved_credentials(self) -> None:
+        auth._store('{"email": "a@b.c", "password": "pw"}')
+        error = AddictuneAppAuthError(401, "Application authentication rejected")
+        with self.assertRaises(AddictuneAppAuthError):
+            await auth.sign_in(_client(AsyncMock(side_effect=error)), "di")
+        self.assertEqual(auth.load_credentials(), ("a@b.c", "pw"))
+        self.assertFalse(auth.is_auth_failure(error))
 
     async def test_transient_failure_propagates_and_keeps_the_credentials(self) -> None:
         auth._store('{"email": "a@b.c", "password": "pw"}')

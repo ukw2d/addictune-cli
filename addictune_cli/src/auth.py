@@ -22,7 +22,7 @@ from .paths import SESSION_FILE
 _log = logging.getLogger("addictune_cli.auth")
 _SERVICE = "addictune-cli"
 _KEYRING_KEY = "credentials"
-# The API's "session expired"; 401, 403 and 422 already arrive as AddictuneAuthError.
+# The API's "session expired"; ordinary credential failures arrive as AddictuneAuthError.
 _SESSION_EXPIRED = 419
 _SECURITY = "/usr/bin/security"
 _KEYCHAIN_NOT_FOUND = 44  # errSecItemNotFound

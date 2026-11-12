@@ -1,4 +1,4 @@
-from addictune_sdk import AddictuneError
+from addictune_sdk import AddictuneAppAuthError, AddictuneError
 from textual import work
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -7,11 +7,13 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label, Static
 
 from ...auth import is_auth_failure, login
+from ...settings import STATION_NAMES
 from ..presentation import (
     AUTH_BRAND,
     AUTH_EMAIL_LABEL,
     AUTH_EMAIL_PLACEHOLDER,
     AUTH_EMAIL_REQUIRED,
+    AUTH_ERROR_APPLICATION,
     AUTH_ERROR_GENERIC,
     AUTH_ERROR_INVALID,
     AUTH_HINT,
@@ -188,7 +190,14 @@ AuthScreen {
             # the error we show below survives.
             with self.prevent(Input.Changed):
                 password_input.value = ""
-            self._show_error(AUTH_ERROR_INVALID if invalid else AUTH_ERROR_GENERIC)
+            if isinstance(exc, AddictuneAppAuthError):
+                message = AUTH_ERROR_APPLICATION.format(
+                    network=STATION_NAMES.get(self.app.network, self.app.network),
+                    status=exc.status_code,
+                )
+            else:
+                message = AUTH_ERROR_INVALID if invalid else AUTH_ERROR_GENERIC
+            self._show_error(message)
             password_input.focus()
             return
         self.dismiss(user_id)

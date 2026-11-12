@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from addictune_sdk import AddictuneAPIError
+from addictune_sdk import AddictuneAPIError, AddictuneAppAuthError
 
 from addictune_cli.src.media.session import NullSession
 from addictune_cli.src.settings import Settings
@@ -187,6 +187,23 @@ class AppInitializationTests(unittest.IsolatedAsyncioTestCase):
 
         app._prompt_login.assert_not_called()
         app.notify.assert_called_once()
+
+    async def test_recover_auth_reports_application_rejection(self) -> None:
+        app = AddictuneApp()
+        app.client = Mock()
+        app._prompt_login = Mock()
+        app.notify = Mock()
+        with patch(
+            "addictune_cli.src.tui.services.auth.sign_in",
+            side_effect=AddictuneAppAuthError(401, "Application authentication rejected"),
+        ):
+            self.assertFalse(await app.recover_auth("rockradio"))
+        app._prompt_login.assert_not_called()
+        app.notify.assert_called_once_with(
+            "Rock Radio rejected application authentication (HTTP 401). "
+            "Your account credentials could not be checked.",
+            severity="error",
+        )
 
     def test_successful_login_sets_the_user_and_loads_channels(self) -> None:
         app = AddictuneApp()

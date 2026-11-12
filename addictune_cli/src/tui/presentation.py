@@ -27,6 +27,10 @@ AUTH_EMAIL_PLACEHOLDER = "you@example.com"
 AUTH_PASSWORD_PLACEHOLDER = "Password"
 AUTH_LOGIN_LABEL = "Sign in"
 AUTH_HINT = "Enter to submit · Esc to cancel"
+AUTH_ERROR_APPLICATION = (
+    "{network} rejected application authentication (HTTP {status}). "
+    "Your account credentials could not be checked."
+)
 AUTH_ERROR_INVALID = "⚠  Invalid email or password. Please try again."
 AUTH_ERROR_GENERIC = "⚠  Couldn't sign in. Check your connection and try again."
 AUTH_EMAIL_REQUIRED = "⚠  Please enter your email."
